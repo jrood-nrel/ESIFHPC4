@@ -1,34 +1,36 @@
-This benchmark for NREL ESIF-HPC4 adapts the Optical Properties of Materials benchmark from the [NERSC-10 Benchmark Suite](https://www.nersc.gov/systems/nersc-10/benchmarks). 
+This benchmark for NREL ESIF-HPC-4 adapts the Optical Properties of Materials benchmark from the [NERSC-10 Benchmark Suite](https://www.nersc.gov/systems/nersc-10/benchmarks). 
 
-Any available ESIF-HPC4 benchmark run rules should be reviewed before running this benchmark.
+Any available general ESIF-HPC-4 benchmark run rules provided in the technical specifications should be reviewed before running this benchmark.
 
 Note, in particular:
-- Any broader ESIF-HPC4 run rules apply to this benchmark except where explicitly noted within this README.
-- Responses to the ESIF-HPC4 RFP including this benchmark must include the performance metrics discussed below in section 3.1. These values include whether the run successfully completed (Validation), the Total Time in seconds, the Total I/O Time in seconds, and the Benchmark Time (defined as Total Time minus Total I/O Time) in seconds. Each timing result must be taken from the "max" column of the "Wall time (s)" right columns (the final time column before "Number of calls") in the BerkeleyGW output file summary table. Each reported result's BerkeleyGW output file must be provided. The reference times included for this benchmark were run by NREL on Kestrel. 
+- Any broader ESIF-HPC-4 run rules apply to this benchmark except where explicitly noted within this README.
+- Responses must include the performance metrics discussed below in section 3.1. These values include whether the run successfully completed (Validation), the Total Time in seconds, the Total I/O Time in seconds, and the Benchmark Time (defined as Total Time minus Total I/O Time) in seconds. Each timing result must be taken from the "max" column of the "Wall time (s)" right columns (the final time column before "Number of calls") in the BerkeleyGW output file summary table. Each reported result's BerkeleyGW output file must be provided. The reference times included for this benchmark were run by NREL on Kestrel. 
 - This benchmark defines multiple problem sizes: small, medium, and large to allow testing across a range of resource sizes. Only the large benchmark is rqeuired for the RFP response, however the offeror might wish to provide additional timing data for the small/medium benchmarks to showcase the offered system's performance at many calculation scales. The multiple problem sizes form a weak-scaling set, and a given problem size can be run with different amounts of compute resources to form a strong-scaling set. We have provided a table with strong-scaling results for each problem size at the end of this document to provide reference data on the performance currently achievable on Kestrel.  
-- This benchmark can be run on standard or accelerated compute nodes, and is expected to perform well on both. In general, we see approximately 3x speed-up for the benchmarks when moving from the smallest possible number of standard nodes each size can run on to the smallest possible number of accelerated nodes. These benchmarks should be performed on each type of node offered.
+- This benchmark can be run on standard or accelerated compute nodes, and is expected to perform well on both. In general, we see approximately 3x speed-up for the benchmarks when moving from the smallest possible number of standard nodes each size can run on to the smallest possible number of accelerated nodes. If both CPU-only and accelerated nodes are offered, it is sufficient to return results only for the accelerated nodes, and CPU-only results may be returned optionally.
 
 For this BerkeleyGW benchmark, we describe here how different job modifications are classified for Baseline, Ported, and Optimized results. Any change not discussed here is assumed to be addressed by the general ESIF-HPC4 run requirements. For example, FP64 precision must be used for the Baseline and Ported reported results. 
 
-For Baseline results, the offeror may:
+For Baseline results, we note here some of the allowed changes that, in our experience, have been impactful for performance:
 1. Modify any optimization flags (the "-O#" flags) in the makefile.
 2. Use any libraries (e.g. scalapack vs ELPA as the eigenvalue solver). The environment used to build BerkeleyGW must be provided in the response.
 3. Change the number of OMP_NUM_THREADS used at runtime.
-4. Change the directory striping for file I/O.
+4. Change the directory striping settings for file I/O, as long as changes to these settings are expected to be available to general, non-privileged users on the offered machine.
+5. Make any other changes, beyond those outlined here, that fall under the general "baseline" definition outlined in the technical specifications.
 
 For Ported results, the offeror may:
-1. Modify the BerkeleyGW offloading directives. BerkeleyGW uses OpenACC and OpenMP-target directives, and which are known to run well on multiple types of accelerated nodes. Other directives may be used if they improve performance. 
+1. Modify the BerkeleyGW offloading directives if it is necessary for the code to execute. BerkeleyGW uses OpenACC and OpenMP-target directives, which are known to run well on multiple types of accelerated nodes.
 
 For Optimized results, the offeror may:
-1. Modify the BerkeleyGW source code in any other way not related to changing the offloading directives. For example, BerkeleyGW runs using FP64 precision and timing results using other precisions may be included as "Optimized" results in the RFP response as long as the job correctness is validated and the changes to the BerkeleyGW source code are documented. 
+1. Modify the BerkeleyGW source code in any other way not covered by the Ported category. Any source code changes must be provided in the response.
+2. Provide results using other precisions beyond FP64 as long as the job correctness is upheld.
 
 # 0. Workflow Overview
 
 Predicting optical properties of materials and nanostructures is a key step toward developing future energy conversion materials and electronic devices. The BerkeleyGW code is widely used for this type of simulation workflow. A typical workflow takes some mean field-related quantities from DFT-based codes such as PARATEC, Abinit, PARSEC, Quantum ESPRESSO, OCTOPUS and SIESTA. Then BerkeleyGW's Epsilon module computes the material's dielectric function. The Sigma module uses the output of the preceding steps to compute the electronic self energy. Two other modules, Kernel and Absorption, can build upon the output from Epsilon and Sigma to calculate the electron-hole interactions and neutral optical excitation properties.
 
-This benchmark focuses on the Epsilon stage of the workflow; the DFT, Sigma, Kernel, and Absorbtion stages are not included in this benchmark. 
+**This benchmark focuses on the Epsilon stage of the workflow; the DFT, Sigma, Kernel, and Absorbtion stages are not included in this benchmark.**
 
-The BerkeleyGW code is mostly written primarily in Fortran, with some C and C++, and contains about 100,000 lines of code. It is parallelized using MPI and OpenMP on the CPU, and OpenACC/OpenMP-target constructs on GPUs. The project website is https://berkeleygw.org, and its documentation is available from http://manual.berkeleygw.org/4.0/. A paper derscribing the details of its implementation is published here: https://www.sciencedirect.com/science/article/pii/S0010465511003912?via%3Dihub. BerkeleyGW is distributed under the Berkeley Software Distribution (BSD) license. Please see the [license.txt](BerkeleyGW/license.txt) and [Copyright.txt](BerkeleyGW/Copyright.txt) files for more details.
+The BerkeleyGW code is written primarily in Fortran, with some C and C++. It is parallelized using MPI and OpenMP on the CPU, and OpenACC/OpenMP-target constructs on GPUs. The project website is https://berkeleygw.org, and its documentation is available from http://manual.berkeleygw.org/4.0/. A paper derscribing the details of its implementation is published here: https://www.sciencedirect.com/science/article/pii/S0010465511003912?via%3Dihub. BerkeleyGW is distributed under the Berkeley Software Distribution (BSD) license. Please see the [license.txt](BerkeleyGW/license.txt) and [Copyright.txt](BerkeleyGW/Copyright.txt) files for more details.
 
 ## 0.1 Epsilon 
 
@@ -41,7 +43,7 @@ For the series of input problems distributed with this benchmark, the computatio
 
 ## 0.2 Parallel decomposition
 
-Epsilon uses a two-tier MPI Inter- and Intra-pool decomposition to exploit the available parallelism. 
+Epsilon uses a two-tier MPI Inter- and Intra-pool decomposition over electronic states to exploit the available parallelism.
 
 # 1. BerkeleyGW Code Access and Compilation Details
 
@@ -69,7 +71,7 @@ BerkeleyGW depends on multiple external software packages, and has been tested e
 | ScaLAPACK/BLACS  | required if MPI is used |  NetLib, Cray LibSci, Intel MKL, AMD |
 | File IO          | required   | HDF5 |
 
-On Kestrel, these libraries can be loaded by module commands:
+On Kestrel, the libraries used to build BerkeleyGW can be loaded by module commands:
 ```bash
 module swap PrgEnv-gnu PrgEnv-nvhpc
 module load cray-hdf5-parallel
@@ -117,7 +119,11 @@ The directory contains three problem sizes:
 | medium       | Si<sub> 510</sub> |
 | large        | Si<sub> 998</sub> |
 
-Each problem simulates a silicon divacancy defect embedded in a series of progressively larger supercells. The small, medium, and large problems are provided to facilitate testing and profiling across a wide range of numbers of resources. 
+Each problem simulates a silicon divacancy defect embedded in a series of progressively larger supercells. The small, medium, and large problems are provided to facilitate testing and profiling across a wide range of numbers of resources.
+
+**Only benchmark runs for the large size are required for the response.**
+
+The offeror should return results for a strong scaling series of N, 2N, and 4N, where N is the smallest number of nodes that the large-sized calculation can fit on. 
 
 ## 2.1 Download wave-function data
 
@@ -259,7 +265,4 @@ Second, for the Large benchmark, we find that 48 nodes runs most optimally using
 
 ## 3.3 Reporting
 
-For any problem size, benchmark results should include the (Max) Total Benchmark Time, (Max) Total I/O Time, and the Benchmark Time (the difference between the first two times), all in seconds. The hardware configuration (i.e. the number of elements from each pool of computational resources) needed to achieve the estimated timings must also be provided. For example, if the anticipated compute system includes more than one type of compute node, then report the number and type of each node used to run the benchmark. If the target system enables disaggregation/composability, a finer grained resource list is needed. BerkeleyGW summary output files (i.e. the one that actually contains the timing data, and not data files such as eps0mat.h5) should be included for each Offeror reported time.
-
-If providing run files, include all the build environment, source and makefiles used to build on the target platform, and input files and runscripts. Include all standard output files.
-
+For any problem size, benchmark results provided in the reporting spreadsheet should include the (Max) Total Benchmark Time, (Max) Total I/O Time, and the Benchmark Time (the difference between the first two times), all in seconds. The hardware configuration (i.e. the number of elements from each pool of computational resources) needed to achieve the estimated timings must also be provided. If both CPU-only and accelerated nodes are offered, it is sufficient to return results only for the accelerated nodes, and CPU-only results may be returned optionally. As part of the file response, include all the build environment, source, and makefiles used to build on the target platform, input files and runscripts, and the primary BerkeleyGW summary output file (i.e. the one that actually contains the timing data and epsilon inverse Head value). Do not return the eps0mat.h5 file.
