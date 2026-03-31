@@ -16,6 +16,6 @@ module load lammps/072225-gpu
 ntasks=$SLURM_NTASKS
 tpn=$SLURM_NTASKS_PER_NODE
 ngpus=$(($((SLURM_GPUS_ON_NODE))*$((SLURM_NNODES))))
-srun --ntasks $ntasks --tasks-per-node=$tpn lmp -sf gpu -pk gpu $ngpus -in lammps.in -log lammps-${ngpus}gpus-${SLURM_JOB_ID}.out
+srun --ntasks $ntasks --tasks-per-node=$tpn lmp -sf gpu -pk gpu ${SLURM_GPUS_ON_NODE} -in lammps.in -log lammps-${ngpus}gpus-${SLURM_JOB_ID}.out
 
 
