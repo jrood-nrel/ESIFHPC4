@@ -86,9 +86,9 @@ A summary of NLR's accelerated node results is shown below. These results were g
 |   Medium  |       8      |    64    |  1500  |    68.617   |    89.5   |          21.861          |          0.0457         |
 |   Medium  |      16      |    128   |  1500  |    43.620   |    92.6   |          34.387          |          0.0291         |
 |   Medium  |      32      |    256   |  1500  |    26.965   |    94.3   |          55.628          |          0.0180         |
-|   Xlarge  |      32      |    256   |   100  |    77.151   |    96.9   |           1.296          |          0.7716         |
-|   Xlarge  |      48      |    384   |   100  |    52.242   |    96.3   |           1.914          |          0.5225         |
-|   Xlarge  |      64      |    512   |   100  |    41.950   |    96.0   |           2.384          |          0.4195         |
+|   Large   |      32      |    256   |   100  |    77.151   |    96.9   |           1.296          |          0.7716         |
+|   Large   |      48      |    384   |   100  |    52.242   |    96.3   |           1.914          |          0.5225         |
+|   Large   |      64      |    512   |   100  |    41.950   |    96.0   |           2.384          |          0.4195         |
 
 ## What Must be Returned
 In addition to the performance benchmark LAMMPS output log files, LAMMPS output log files from the two validation runs should also be included in the File Response. Below is a summary list of the minimum set of requested runs:
