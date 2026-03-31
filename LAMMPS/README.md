@@ -26,6 +26,8 @@ LAMMPS can be built by following the instructions at [https://lammps.sandia.gov/
 How to Run  
 ---------- 
 
+The total number of timesteps taken in each benchmark can be increased by increasing $N_t$. $N_t$ is the only value in the LAMMPS input files that can be modified by the Offeror. It cannot be decreased, and may only be increased if a longer trajectory would better showcase the Offeror's system/performance. See the Description above for further details about $N_t$.
+
 ### Medium benchmark scaling series
 The medium benchmark targets message-rate-bound performance
 #### CPU-only Submissions
@@ -44,13 +46,6 @@ The large benchmark is intended to test multi-node performance
 - N, 2N, and 4N node scaling series, where N may be chosen by the offeror (though can simply be N=1)
 - Baseline submissions should use all devices per node. Optional optimized submissions may use any number of devices per node.
 
-The total number of timesteps taken in each benchmark can be increased by increasing $N_t$. $N_t$ is the only value in the LAMMPS input files that can be modified by the Offeror. It cannot be decreased, and may only be increased if a longer trajectory would better showcase the Offeror's system/performance. See the Description above for further details about $N_t$.
-
-The "Baseline (as-is)" benchmark must be run on Standard and Accelerated nodes with no OpenMP parallization, that is, `OMP_NUM_THREADS=1`.
-
-For "Optimized" runs only, the Offeror is allowed to vary the number of MPI ranks per node to find a more optimal value. It is possible that the optimal benchmark speed is achieved when the number of MPI ranks per node is smaller than the number of CPU cores per node.
-
-The medium benchmark is intended to test jobs more bound by message rate and should be run on 1, 2, 4, and 8 nodes (for CPU-only submissions) or devices (for GPU-accelerated submissions). If the offered accelerated nodes contain 8 or more devices, then one result must be returned in which the devices are divided across two nodes (e.g., a two-node run configuration with 4 devices per node). The large benchmark is intended to test multi-node performance. Therefore, large benchmark jobs should be run on N, 2N, and 4N nodes for both CPU-only and GPU-accelerated submissions, where N may be chosen by the offeror (though can simply be N=1).   
 
 How to Validate
 ---------------
