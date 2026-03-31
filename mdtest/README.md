@@ -46,6 +46,14 @@ It is important to note that the total number of ranks for a given run must be a
 
 We provide an example script `kestrel-mdtest-example-run-simple.sh` running mdtest on 16 nodes with a slurm scheduler.
 
+Our example script was run with the following module environment on the reference HPC (Kestrel):
+```
+  1) craype-x86-spr     5) libfabric/1.15.2.0    9) PrgEnv-gnu/8.5.0
+  2) gcc-native/12.1    6) craype-network-ofi   10) git/2.48.1
+  3) craype/2.7.30      7) cray-mpich/8.1.28
+  4) cray-dsmml/0.2.2   8) cray-libsci/23.12.5
+```
+
 ## Useful input flags
 
 Available options may be displayed with the "-h" option to mdtest. Useful options include
@@ -71,6 +79,7 @@ In addition to the information requested in the General Benchmark instructions, 
  * The file system configuration and mount options used for testing
  * The storage media and configurations used for each tier of the storage subsystem
  * Network fabric used to connect servers, clients and storage including network configuration settings and topology
+
 
 
 

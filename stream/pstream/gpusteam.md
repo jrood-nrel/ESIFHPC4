@@ -1,8 +1,6 @@
 # GPU stream benchmark
 
 
-
-
 ## Purpose
 
 Stream.cu and mstream.cu are GPU versions of the classic stream.c benchmark.
@@ -15,8 +13,7 @@ parallel.  It normally would be run with the number of tasks on a node equal
 to the number of GPUs on the node.
 
 
-
-## Build and run...
+## Build and run cuda versions...
 
 The included makefile shows the build process of the two codes.  Stream.cu
 can be built with the "normal" nvcc.  Mstream.cu requires a mpicc that also
@@ -143,38 +140,11 @@ x3104c0s21b0n0,2,10.7759,10.7759,16.1638,16.1638
 x3104c0s21b0n0,3,10.7759,10.7759,16.1638,16.1638
 
 
-
-# AMD programs
-
-The directory **amd** containes two programs.  These are "a work in progress" and at this time there is no reporting requirements developed.  
-
-**astream.cpp** is similar to mstream.cu but uses hip instead of cuda.  The kernels are a bit different and there is an option to run with groups.  The goal of groups as stted in the source is to "is reduce the dispatch overhead".
-
-**stream.hip** is a simple program that calls the normal stream tests a single time.  The hip kernels in this code match the cuda versions.  This code requires
-some include files that can be found in the repo: https://github.com/ROCm/rocm-examples.git.
+## Hip versions
+Mstream.hip and stream.hip are hip versions of the codes.  These can be built 
+with the script dohip.
 
 
-These two code were runt on NRELs experimental machine mi250-test.hpc.nrel.gov which has 8 AMD gpus.
-
-## astream build and run procedure
-
-```
-ml openmpi
-export OMPI_CC=/opt/rocm/bin/hipcc
-mpicc -std=c++11 -O3 -lm astream.cpp -o astream
-mpirun -n 8 ./astream
-```
-
-## stream.hip build and run procedure
-
-```
-git clone https://github.com/ROCm/rocm-examples.git
-cp stream.hip rocm-examples/HIP-Basic/saxpy
-cd rocm-examples/HIP-Basic/saxpy
-/opt/rocm/bin/hipcc -std=c++17 -Wall -Wextra -I ../../Common  -o hip_stream stream.hip 
-./hip_stream
-
-```
 
 
 

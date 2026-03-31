@@ -2,7 +2,7 @@
 
 ## Purpose and Description
 
-This benchmark is intended to stress *GPU-GPU* (or more generally, *accelerator-accelerator*) network communication relevant to AI training through the use of an appropriate collective communication library (CCL). The exact implementation of this benchmark depends on the target's hardware architecture. For example, because Kestrel (our current flagship system) hosts NVIDIA H100 GPUs, our AllReduce tests utilize [NCCL](https://developer.nvidia.com/nccl). Running AllReduce utilizing any equivalent, readily available, and actively maintained CCL is satisfactory for this benchmark (e.g., NCCL, RCCL, or OneCCL). For guidelines on specific benchmark test implementations, please see [How to run](#how-to-run).
+This benchmark is intended to stress *GPU-GPU* (or more generally, *accelerator-accelerator*) network communication relevant to AI training through the use of an appropriate collective communication library (CCL). The exact implementation of this benchmark depends on the target's hardware architecture. For example, because Kestrel (our current flagship system) hosts NVIDIA H100 GPUs, our AllReduce tests utilize [NCCL](https://developer.nvidia.com/nccl). Running AllReduce utilizing any equivalent, readily available, and actively maintained CCL is satisfactory for this benchmark (e.g., NCCL, RCCL, or OneCCL). For guidelines on specific benchmark test implementations, please see [How to Run](#how-to-run).
 
 ## Licensing Requirements
 
@@ -12,22 +12,19 @@ None.
 
 None.
 
-## How to build
+## How to Build
 
-Exact build instructions will depend on the chosen CCL implementation and hardware. For a specific example, please see the Slurm script [`build_nccl_cxi.sh`](./build_nccl_cxi.sh) for reference instructions on how we built NCCL with CXI-enabled libfabric on Kestrel. Note the use of a custom Open Fabrics Initiative (OFI) plugin to enable the use of HPE Slingshot communication protocols, which is needed because NCCL assumes an InfiniBand interconnect by default. This step may not be necessary depending on your hardware and network configuration. 
+Exact build instructions will depend on the chosen CCL implementation and hardware. For a specific example, please see the Slurm script [`build_nccl_cxi.sh`](./build_nccl_cxi.sh) for reference instructions on how we built NCCL with CXI-enabled libfabric on Kestrel. Note the use of a custom Open Fabrics Initiative (OFI) plugin to enable the use of HPE Slingshot communication protocols, which is needed because NCCL assumes an InfiniBand interconnect by default. This step may not be necessary depending on your hardware and network configuration.
 
 ## Run Definitions and Requirements
 
-On Kestrel, the maximum out-of-place bus bandwidth is ~45.7 GB/s as measured by NCCL AllReduce. See [Benchmark test results to report and files to return](#benchmark-test-results-to-report-and-files-to-return) below for reference.
-
-## How to run
-
-See [`run_nccl_cxi.sh`](./run_nccl_cxi.sh) for an example submission script of running `all_reduce_perf` on Kestrel from the official [nccl-tests](https://github.com/NVIDIA/nccl-tests/tree/master) repository.
+### How to Run
 
 The specific implementation of the CCL benchmark depends on the proposed hardware. If the vendor has published an open-source implementation of tests that utilize their corresponding CCL, this implementation should be used in the baseline response. For example:
 
 * NCCL tests: https://github.com/NVIDIA/nccl-tests 
-* RCCL tests: https://github.com/ROCm/rccl-tests
+* RCCL tests: https://github.com/ROCm/rocm-systems/tree/develop/projects/rccl-tests
+* Intel OneCCL tests: https://www.intel.com/content/www/us/en/docs/oneccl/benchmark-user-guide/2021-14/benchmark.html
 
 If an open-source implementation of CCL tests is not available, then the offeror may provide another implementation, but must report exactly how it was built & run, including the source code and any relevant scripts. The implementation must follow the rules outlined in the "baseline/ported/optimized" definitions in the technical specifications. Specifically, the implementation cannot use unknown or unpublished libraries, and any language interface or architecture-specific language constructs used must be well-documented and publically available at the time of machine arrival.
 
@@ -43,7 +40,7 @@ To demonstrate intra-node CCL performance, each collective should be run across 
 
 To demonstrate inter-node CCL performance, each collective should be run in two jobs with increasingly large node counts relative to the size of the test system.
 
-#### Summary of requested tests
+#### Summary of Requested Tests
 
 | Test          | Nodes Used  | Ranks Used        |
 |---------------|-------------|-------------------|
@@ -53,49 +50,46 @@ To demonstrate inter-node CCL performance, each collective should be run in two 
 
 **15% of nodes proposed by offeror. If this number exceeds the total number of nodes on the test system, then running the CCL benchmark on all accelerated test nodes satisfies this requirement.
 
-## Run Rules
+### Run Rules
 
-Any run must utilize all available accelerators on each node. For all configurations described above, the collective test should scan message sizes between 256B to 4GB, increasing by a factor of 2. For example (launched via Slurm):
+Any run must utilize all available accelerators on each node. For all configurations described above, the collective test should scan message sizes between 8B to 4GB, increasing by a factor of 2. The reducing operation must be `sum`, and the highest precision that is natively supported on the hardware (e.g., `double`) must be used. See [`run_nccl_cxi.sh`](./run_nccl_cxi.sh) for an example submission script of running `all_reduce_perf` on Kestrel from the official [nccl-tests](https://github.com/NVIDIA/nccl-tests/tree/master) repository following these rules.
 
-```
-srun all_reduce_perf -b 256 -e 4G -f 2
-```
+## Benchmark Test Results to Report and Files to Return
 
-**Options:**
-- `-b`: Minumum size in bytes
-- `-e`: Maximum size in bytes
-- `-f`: Increment factor
+**File response:** We request the raw data associated with each CCL run be provided, demonstrating the bandwidth and latency for each message size. An example logfile is provided [below](#logfile-example). Additionally, any environment variables, fabric settings, and/or CCL configuration settings necessary to reproduce the results should be provided. The offeror should distinguish between parameters which may be set by an unprivileged user from those which would be globally set by system adminstrators.
 
+**Spreadsheet response:** We request the out-of-place and in-place bandwidth and latencies, as well as high-level information about the system the benchmark was run on, to be reported in a spreadsheet (template [below](#spreadsheet-template)) for the following message sizes (in bytes):
 
-## Benchmark test results to report and files to return
+- 8
+- 524288
+- 33554432
+- 4294967296
 
-**File response:** We request the raw data associated with each CCL run, demonstrating the bandwidth and latency for each message size. An example logfile is provided [below](#allreduce-reference).
+### AllReduce Reference
 
-**Spreadsheet response:** We request the out-of-place and in-place bandwidth and latency to be reported in a spreadsheet format for representative message sizes* (template below). *A small Python script will be provided in this repository at a later date to summarize the CCL results for ease of formatting for this response.*
+Below are AllReduce results from Kestrel when running [`all_reduce_perf`](https://github.com/NVIDIA/nccl-tests/tree/master) built with the [custom NCCL+CXI plugin](https://github.com/NERSC/nccl-ofi-plugin) (described in [How to Build](#how-to-build)) to enable the use of the HPE Slingshot interconnect. This example output represents a run of 64 GPU devices across 16 nodes:
 
-\* Representative message sizes (bytes): `524288`, `33554432`, `4294967296`
+#### Spreadsheet Template 
 
-### AllReduce reference
+|System|Replicate|Collective Operation|Min byte size|Max byte size|Increment factor|Number of devices|Number of nodes|NICs per node| Message size (B)|Out-of-Place Time (uS)|Out-of-Place Algorithmic Bandwidth (GB/s)|Out-of-Place Bus Bandwidth (GB/s)|In-Place Time (uS)|In-Place Algorithmic Bandwidth (GB/s)|In-Place Bus Bandwidth (GB/s)|
+|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|
+|Reference (Kestrel)|1|AllReduce|8B|4G|2|64|16|2|8|59.83|0.00|50.15|462.2|0.00|0.00|
+|Reference (Kestrel)|1|AllReduce|8B|4G|2|64|16|2|524288|835.3|0.63|1.24|462.2|1.13|2.23|
+|Reference (Kestrel)|1|AllReduce|8B|4G|2|64|16|2|33554432|2973.4|11.29|22.22|2636.4|12.73|25.06|
+|Reference (Kestrel)|1|AllReduce|8B|4G|2|64|16|2|4294967296|184959|23.22|45.72|185005|23.22|45.71|
 
-Below are AllReduce results from Kestrel when running [`all_reduce_perf`](https://github.com/NVIDIA/nccl-tests/tree/master) built with the [custom NCCL+CXI plugin](https://github.com/NERSC/nccl-ofi-plugin) (described in 'How to build') to enable the use of the HPE Slingshot interconnect. This example output represents a run of 64 GPU devices across 16 nodes:
-
-**Spreadsheet Template:**
-
-*A small Python script will be provided in this repository at a later date to summarize the CCL results for ease of formatting for this response.*
-
-|System|Replicate|Collective Operation|Command|Number of devices|Number of nodes|Message size (B)|Out-of-Place Latency (uS)|Out-of-Place Algorithmic Bandwidth (GB/s)|Out-of-Place Bus Bandwidth (GB/s)|In-Place Latency (uS)|In-Place Algorithmic Bandwidth (GB/s)|In-Place Bus Bandwidth (GB/s)|
-|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|:--|
-|Reference (Kestrel)|1|AllReduce|all_reduce_perf -b 8 -e 4G -f 2|64|16|524288|835.3|0.63|1.24|462.2|1.13|2.23|
-|Reference (Kestrel)|1|AllReduce|all_reduce_perf -b 8 -e 4G -f 2|64|16|33554432|2973.4|11.29|22.22|2636.4|12.73|25.06|
-|Reference (Kestrel)|1|AllReduce|all_reduce_perf -b 8 -e 4G -f 2|64|16|4294967296|184959|23.22|45.72|185005|23.22|45.71|
-
-**Logfile Example:**
+#### Logfile Example from Kestrel Reference Run Using NCCL
 
 ```
 #
 #                                                              out-of-place                       in-place
 #       size         count      type   redop    root     time   algbw   busbw #wrong     time   algbw   busbw #wrong
 #        (B)    (elements)                               (us)  (GB/s)  (GB/s)            (us)  (GB/s)  (GB/s)
+           8             2     float     sum      -1    59.83    0.00    0.00      0    50.15    0.00    0.00      0
+          16             4     float     sum      -1    48.52    0.00    0.00      0    48.03    0.00    0.00      0
+          32             8     float     sum      -1    49.18    0.00    0.00      0    48.92    0.00    0.00      0
+          64            16     float     sum      -1    57.47    0.00    0.00      0    56.21    0.00    0.00      0
+         128            32     float     sum      -1    56.61    0.00    0.00      0    57.15    0.00    0.00      0
          256            64     float     sum      -1    58.16    0.00    0.01      0    57.66    0.00    0.01      0
          512           128     float     sum      -1    60.88    0.01    0.02      0    61.13    0.01    0.02      0
         1024           256     float     sum      -1    68.15    0.02    0.03      0    72.95    0.01    0.03      0

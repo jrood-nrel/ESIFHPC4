@@ -1,0 +1,14 @@
+
+module restore
+ml gcc
+ml openmpi
+ml rocm
+rm -f strm.0*
+rm -f mstream.amd stream.amd
+export OMPI_CC=`which hipcc`
+INCPATH=$(dirname $(dirname $(dirname $(which gcc)))/include/c++/*/math.h)
+mpicc  -std=c++11 -O3 -lm -DNGPUS=8 -DNTIMES=2000 -I$INCPATH  -I$INCPATH/x86_64-pc-linux-gnu mstream.hip -o mstream.amd
+mpirun  -n 8 ./mstream.amd
+hipcc -std=c++11 -O3 -lm -I$INCPATH  -I$INCPATH/x86_64-pc-linux-gnu   -DNTIMES=1000 stream.hip -o stream.amd
+./stream.amd
+

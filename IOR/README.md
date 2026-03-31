@@ -23,20 +23,22 @@ See `kestrel_example_build_script.sh` used to build IOR on Kestrel.
 These tests require MPI and HDF5.
 
 **Note on versions used:** 
+The following packages and versions were used to obtain reference results on the Kestrel system:
 * IOR v3.3.0
 * MPI cray-mpich v8.1.28
 * HDF5 hdf5-parallel v1.12.2.9
 
+The offeror is free to use newer versions of these packages. Please note that different versions of IOR allow for different combinations of keywords and may behave in different ways. The reference input files apply to IOR version 3.3.0. If the offeror wishes to use a newer version of IOR, input files may requiring updating in order to generate an equivalent test. These modifications are allowed, as long as the modified input files and a brief description of the equivalence are returned as part of the response. For example, IOR 3.3.0 allows for `blockSize` = `transferSize`, which we use to set up the random IO test described in #3 below (`test3_random_posix.ior`). However, in IOR v4.0.0, our input test file will cause a "blockSize and transferSize cannot be the same" error, so an equivalent random access test would need to be created by modifying the `blockSize` to be consistent with this change.
 
 
 ## Run Definitions and Requirements
 
-We define four IOR tests. Sample input files for these tests can be found in the IOR-tests folder. Note that test 4 is under development and not yet available as of August 1, 2025.
+We define four IOR tests. Sample input files for these tests can be found in the IOR-tests folder. 
 
 1. Fully sequential, large-transaction reads and writes, file-per-process, POSIX and MPI-IO
 2. Fully sequential, large-transaction reads and writes, single file, MPI-IO only
 3. Random, small transaction reads and writes, file-per-process, POSIX-only
-4. HDF5 test meant to replicate the IO patterns of the [Rev](https://github.com/NREL/reV) application
+4. HDF5 test meant to replicate the IO patterns of the [Rev](https://github.com/NREL/reV) application. Similar to Test 2, but with api=HDF5 and each MPI task writing/reading to/from its own dataset in the HDF5 file.
 
 For all tests:
 - Repeat for each offered filesystem
@@ -46,14 +48,14 @@ For all tests:
 - Optimizations that would allow for page caching are not allowed.
 
 For tests 1 and 2, and 4:
-- Execute on a single node, 15% of offered nodes, and the number of nodes that results in max bandwidth.
-- The single node test and the 15% of nodes test must be run with 80% of available cores subscribed. In addition, the vendor can optionally execute these tests with an optimal number of available cores, if this number is less than 80% of available cores.
+- Execute on a single node, 10% of offered nodes, and the number of nodes that results in max bandwidth.
+- The single node test and the 10% of nodes test must be run with 80% of available cores subscribed. In addition, the vendor can optionally execute these tests with an optimal number of available cores, if this number is less than 80% of available cores.
 - Transfer and block size can be changed to achieve optimal performance
 - At least 80% of the node's RAM must be pre-populated (i.e. `memoryPerNode = 80%` or higher)
 
 For test 3:
 - Execute with POSIX only
-- Execute on 15% of offered nodes only
+- Execute on 10% of offered nodes only
 - Transfer and block size cannot be changed
 - At least 80% of the node's RAM must be pre-populated (i.e. `memoryPerNode = 80%` or higher)
 
@@ -75,7 +77,7 @@ Currently Loaded Modules:
   3) craype/2.7.30     6) craype-network-ofi   9) PrgEnv-gnu/8.5.0
 ```
 
-Striping commands on Kestrel to create target test directories:
+PFL striping commands on Kestrel to create target test directories:
 * kfs2 
 ```
 cd /projects/<project>/ior-tests/

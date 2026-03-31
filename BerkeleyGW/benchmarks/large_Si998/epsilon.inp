@@ -11,12 +11,9 @@ end
 use_wfn_hdf5
 
 dont_check_norms
-
 comm_nonblocking_cyclic
 
 # accel_chi_summation_no_full_offload
-
-max_mem_nv_block_algo 20
-
+max_mem_nv_block_algo 80
 # number_valence_pools 8
 

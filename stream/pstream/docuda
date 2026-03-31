@@ -1,0 +1,16 @@
+rm -f strm.0*
+rm -f mstream stream
+
+module restore
+ml gcc
+ml openmpi
+ADIR=$(dirname $(dirname `which mpirun`))
+ml cuda
+nvcc -L$ADIR/lib -I$ADIR/include mstream.cu -lmpi -DNTIMES=1000 -o mstream
+
+scontrol show hostnames > hostlist
+mpirun -N 4 -hostfile hostlist ./mstream 
+rm hostlist
+
+nvcc  -DNTIMES=1000 stream.cu -o stream
+./stream

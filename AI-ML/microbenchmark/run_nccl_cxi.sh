@@ -26,4 +26,4 @@ export NCCL_NET_GDR_LEVEL=PHB
 
 echo "NCCL_HOME is set to $NCCL_HOME"
 echo ========== RUNNING NCCL TESTS ==========
-srun $PWD/nccl-tests/build/all_reduce_perf -b 256 -e 4G -f 2
+srun $PWD/nccl-tests/build/all_reduce_perf -b 8 -e 4G -f 2 -d double

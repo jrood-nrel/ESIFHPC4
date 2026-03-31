@@ -24,8 +24,25 @@ Optional libraries or packages included in the LAMMPS distribution (*e.g.*, the 
 LAMMPS can be built by following the instructions at [https://lammps.sandia.gov/doc/Install.html](https://docs.lammps.org/Build.html). For systems with GPUs, a version should be built with the LAMMPS GPU or KOKKOS package. All benchmarks should be run using FP64 for baseline, ported, or optimized submissions. 
 
 How to Run  
-----------
-For all runs, use MPI ranks and threads (where applicable for optional openMP runs) such that the total number of cores used (ranks × threads) is at least 75% of the physical cores per node. The "# cores" reported should reflect the number of physical CPU cores hosting independent threads of execution.
+---------- 
+
+### Medium benchmark scaling series
+The medium benchmark targets message-rate-bound performance
+#### CPU-only Submissions
+- A strong scaling series of 1, 2, 4, and 8 nodes
+- Baseline submissions should use MPI ranks such that the total number of cores used is at least 75% of the physical cores per node, with no OpenMP parallelization (i.e., `OMP_NUM_THREADS=1`). Optional optimized submissions may use any number of MPI ranks and/or OpenMP threads.
+#### Accelerated Submissions
+- A strong scaling series of 1, 2, 4, and 8 devices.
+- If the offered accelerated nodes contain 8 or more devices, then one 8-device result must be returned in which the devices are divided across two nodes (i.e., 4 devices per node).
+
+### Large benchmark scaling series
+The large benchmark is intended to test multi-node performance
+#### CPU-only Submissions
+- N, 2N, and 4N node scaling series, where N may be chosen by the offeror (though can simply be N=1)
+- Baseline submissions should use MPI ranks such that the total number of cores used is at least 75% of the physical cores per node, with no OpenMP parallelization (i.e., `OMP_NUM_THREADS=1`). Optional optimized submissions may use any number of MPI ranks and/or OpenMP threads.
+#### Accelerated Submissions
+- N, 2N, and 4N node scaling series, where N may be chosen by the offeror (though can simply be N=1)
+- Baseline submissions should use all devices per node. Optional optimized submissions may use any number of devices per node.
 
 The total number of timesteps taken in each benchmark can be increased by increasing $N_t$. $N_t$ is the only value in the LAMMPS input files that can be modified by the Offeror. It cannot be decreased, and may only be increased if a longer trajectory would better showcase the Offeror's system/performance. See the Description above for further details about $N_t$.
 

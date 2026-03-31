@@ -1,0 +1,3 @@
+rm -f mstream.amd stream.amd
+rm -f mstream stream
+rm -f strm.0*

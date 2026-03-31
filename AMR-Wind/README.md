@@ -27,11 +27,13 @@ This is the same as the previous GPU case but with GPU-aware MPI enabled on Kest
 This is the same as the previous GPU case but is run as a single simulation with plot output done at timestep 20:
 [amr-wind-benchmark-gpu-verify.sh](amr-wind-benchmark-gpu-verify.sh)
 
-## Run Definitions and Requirements
+## Running the Benchmark
 
-### Benchmark Case
+### Benchmark Case Description
 
-We create a benchmark case on top of our standard `abl_godunov` regression test by adding runtime parameters on the command line. This case is designed to be either weak-scaled or strong scaled. This simulation runs a simple atmospheric boundary layer (ABL) that stays fixed in the Z dimension, but can be scaled arbitrarily in the X and Y dimensions. We also add a single refinement level across the middle of the domain to complete the exercising of the full AMR algorithm. Below, we show the CPU case done as a weak scaling merely to show that if different sizes of the simulation make more sense to run on other machines, this is the way we would weak scale it:
+We create a benchmark case on top of our standard `abl_godunov` regression test by adding runtime parameters on the command line. This case is designed to be either weak-scaled or strong scaled. This simulation runs a simple atmospheric boundary layer (ABL) that stays fixed in the Z dimension, but can be scaled arbitrarily in the X and Y dimensions. We also add a single refinement level across the middle of the domain to complete the exercising of the full AMR algorithm. 
+
+Below, we show the CPU case done as a weak scaling merely to show that if different sizes of the simulation make more sense to run on other machines, this is the way we would weak scale it:
 
 ```
 srun amr_wind abl_godunov.inp ${FIXED_ARGS} amr.n_cell=64 64 64 geometry.prob_hi=1024.0 1024.0 1024.0
@@ -41,6 +43,9 @@ srun amr_wind abl_godunov.inp ${FIXED_ARGS} amr.n_cell=512 512 64 geometry.prob_
 srun amr_wind abl_godunov.inp ${FIXED_ARGS} amr.n_cell=1024 1024 64 geometry.prob_hi=16384.0 16384.0 1024.0
 srun amr_wind abl_godunov.inp ${FIXED_ARGS} amr.n_cell=2048 2048 64 geometry.prob_hi=32768.0 32768.0 1024.0
 ```
+
+Note that `amr.n_cell` refers to the number of cells in the outermost refinement layer as `amr.n_cell=x_cells y_cells z_cells`. `z_cells` remains fixed at 64. As `x_cells` and `y_cells` are increased, the corresponding spatial dimensions must be scaled accordingly in order to keep the cell size the same. This is controlled by `geometry.prob_hi=x_dim y_dim z_dim`. `z_dim` remains fixed at 1024 while `y_dim` and `x_dim` are increased proportional to the increase in `y_cells` and `x_cells` respectively.
+
 
 ## Running
 
@@ -110,17 +115,48 @@ Output from fcompare when running the CPU case on the reference machine and comp
 
 Output from fcompare when running the GPU case on the reference machine and comparing it to the GPU reference plot can be seen [here](amr-wind-benchmark-kestrel-results/amr-wind-benchmark-gpu-fcompare-results.txt). Note it's nondeterministic between runs, but close to machine precision when run twice on the same machine.
 
+If a calculation exceeds `1e-10` in both absolute and relative error in any quantity output by `fcompare`, it should be considered to have failed the validation check.
+
 Also of note, when AMR-Wind is built for the GPU, `fcompare` from that build will run on the GPU as well. We used the CPU `fcompare` executable for comparing our both our CPU and GPU plot files in these benchmarks to be consistent.
 
 ## Rules
 
-* Any optimizations would be allowed in the code, build, and task configuration as long as the offeror would provide a high-level description of the optimization techniques used and their impact on performance in the response.
-* The offeror can use accelerator-specific compilers and libraries.
-* We request that at least 90% of CPU cores on CPU nodes are utilized.
-* We run 1 rank per GPU for AMR-Wind, however if running multiple ranks per GPU is beneficial, that would be allowed.
 
-## Benchmark test results to report and files to return
+* The offeror may freely adapt the build and run scripts provided here so long as the `FIXED_ARGS` are not modified and the other run rules in this list are adhered to.
+* For baseline CPU submissions, we request that at least 80% of CPU cores are utilized. Optimized CPU submissions may use any number of cores. Please note that all CPU submissions are optional.
+* Our reference GPU results were obtained with 1 rank per GPU for AMR-Wind; however, if running multiple ranks per GPU is beneficial, that would be allowed.
+* Baseline results must be submitted with AMR-Wind version 3.8.0. Optimized submissions may use any version.
+* All submissions must use only FP64, even if reduced precision becomes available in future releases.
+* For (optional) optimized submissions, any optimizations would be allowed in the code, build, and task configuration as long as the offeror would provide a high-level description of the optimization techniques used and their impact on performance in the response. Please note that this is more permissive than the "default" baseline/ported/optimized rules in that these optimizations do not need to be made available in a "maintainable" form.
 
+### Test case definitions
+
+Please note that, in an effort to increase the tractability of the overall benchmarking suite, a response to the CPU test case is optional. Any CPU results returned, whether obtained from a test system or from a projection, are valued.
+
+#### Baseline test case
+
+The baseline test case for GPUs should be run with `amr.n_cell=1024 1024 64` and `geometry.prob_hi=16384.0 16384.0 1024.0`
+
+The baseline test case for CPUs should be run with `amr.n_cell=512 512 64` and `geometry.prob_hi=8192.0 8192.0 1024.0`, which is 1/4th the problem size of the GPU case in terms of cell count. 
+
+That the cell counts differ between CPU and GPU test cases is an intentional choice that reflects how AMR-Wind simulations are typically chosen to run on CPU or GPU. The CPU case represents the largest possible problem size that can be executed on the CPU nodes of the reference system without running out of memory, and likewise for the GPU case. GPUs are usually used to increase the problem size that be simulated with an "equivalent" amount of hardware nodes, moreso than directly increasing the time per timestep of an identical calculation to the CPU case.
+
+The computational cost of this benchmark scales approximately linearly with the number of cells in the simulation domain. I.e., on the same hardware, an otherwise identical simulation but with 4x the cell count would expect to run in approximately 4x the amount of time.
+
+For both the GPU and (optional) CPU baseline test cases, a strong scaling series of 1, 2, 4, and 8 nodes should be returned. 
+
+#### (Optional) Optimized test case
+
+In addition to the permissive "optimized" case rules laid out under [Rules](#Rules), we allow for two types of additional tests to be submitted:
+
+1. The offeror may modify the simulation such that the number of cells in the x- and y-directions are increased to the maximum possible on a single node before running out of memory, then report a strong scaling series at this cell count. 
+2. The offeror may present a weak-scaling series where the number of cells at every node count is increased to the maximum possible before running out of memory.
+
+#1 represents a strong scaling series whose simulation size has been tuned to produce optimal performance on the offered hardware. #2 represents a common means through which AMR-Wind users take advantage of the HPC system (i.e., by direct increase of the problem size itself).
+
+For either case, please refer to the [Benchmark Case Description](#benchmark-case-description) section for instructions on how to increase the system size.
+
+## Results to return
 The output from all the runs used to create the plot of the results from the Kestrel machine are provided [here](amr-wind-benchmark-kestrel-results) as a reference.
 
 The AMR-Wind-specific information should be provided in the Excel spreadsheet which includes the other benchmarks, in the AMR-Wind tab.
