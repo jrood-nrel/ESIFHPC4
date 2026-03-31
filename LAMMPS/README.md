@@ -7,11 +7,11 @@ This benchmark was generated using LAMMPS version 22-Jul-2025. The source code f
 
 This benchmark performs short simulations of a 35% LiCl solution pre-equlibrated to 300 K and 1 atm with about 0.75 million atoms in a cubic cell, ~20 nm on a side. We supply a LAMMPS parameter file `data.begin.bz2`. This compressed file must be uncompressed before any test runs, for example using `bunzip2 data.begin.bz2`. It contains coordinates and velocities of the atoms.
 
-There are 3 benchmark sizes: small, medium, and large. The medium and large sizes are generated programatically via the LAMMPS `replicate` input flag in each respective input file, while the small benchmark uses the structure 'as-is' in the `data.begin` file. The medium size replicates data.begin into a 2x2x2 supercell and the large a 8x8x8. Each benchmark size is locatd in a separate directory with its own `lammps.in` file read by the `lmp` executable. 
+There are 3 benchmark sizes: small, medium, and large. The medium and large sizes are generated programatically via the LAMMPS `replicate` input flag in each respective input file, while the small benchmark uses the structure 'as-is' in the `data.begin` file. The medium size replicates data.begin into a 2x2x2 supercell and the large a 8x8x8. Each benchmark size is located in a separate directory with its own `lammps.in` file read by the `lmp` executable. 
 
 For time performance benchmarks, only the medium and large benchmarks are required in the response. The small size is only provided for debugging/testing and optional responses. 
 
-The benchmarks' timestep is all 1 fs. Thermodynamic summary quantities, such as the total system energy, are evaluated every $T$ timesteps, where $T$ is specified by the thermo_print LAMMPS input tag. The total number of timesteps each benchmark runs for is 10\*$T$ so that the number of thermodynamic evaluations is consistent among all jobs. The total number of timesteps taken in each benchmark can thus be increased by increasing $T$. $T$ is the only value in the LAMMPS input files that can be modified by the Offeror, and may only be increased if a longer trajectory would better showcase the Offeror's system/performance. $T$ was selected such that all benchmarks ran in under ~10 minutes on NLR's Kestrel machine using the fewest resources that can hold each benchmark in memory. 
+The benchmarks' timestep is all 1 fs. Thermodynamic summary quantities, such as the total system energy, are evaluated every $N_t$ timesteps, where $N_t$ is specified by the thermo_print LAMMPS input tag. The total number of timesteps each benchmark runs for is $10 N_t$ so that the number of thermodynamic evaluations is consistent among all jobs. The total number of timesteps taken in each benchmark can thus be increased by increasing $N_t$. $N_t$ is the only value in the LAMMPS input files that can be modified by the Offeror. It cannot be decreased, and may only be increased if a longer trajectory would better showcase the Offeror's system/performance. $N_t$ was selected such that all benchmarks ran in under ~10 minutes on NLR's Kestrel machine using the fewest resources that can hold each benchmark in memory. 
 
 For the correctness validation part of the response, we only require 2 short medium benchmark runs, 1 for a Standard node and 1 for an Accelerated node. See the section below for further details and requirements. A directory with reference results and a validation script are provided in the `medium-validation` directory.
 
@@ -25,6 +25,8 @@ LAMMPS can be built by following the instructions at [https://lammps.sandia.gov/
 
 How to Run  
 ---------- 
+
+The total number of timesteps taken in each benchmark can be increased by increasing $N_t$. $N_t$ is the only value in the LAMMPS input files that can be modified by the Offeror. It cannot be decreased, and may only be increased if a longer trajectory would better showcase the Offeror's system/performance. See the Description above for further details about $N_t$.
 
 ### Medium benchmark scaling series
 The medium benchmark targets message-rate-bound performance
@@ -94,7 +96,22 @@ A summary of NLR's accelerated node results is shown below. These results were g
 |   Small   |       8      |    64    |  2500  |    27.442   |    92.5   |          91.101          |          0.0110         |
 |   Medium  |       4      |    32    |  1500  |   123.490   |    86.4   |          12.147          |          0.0823         |
 |   Medium  |       8      |    64    |  1500  |    68.617   |    89.5   |          21.861          |          0.0457         |
+|   Medium  |      16      |    128   |  1500  |    43.620   |    92.6   |          34.387          |          0.0291         |
+|   Medium  |      32      |    256   |  1500  |    26.965   |    94.3   |          55.628          |          0.0180         |
+|   Large   |      32      |    256   |   100  |    77.151   |    96.9   |           1.296          |          0.7716         |
+|   Large   |      48      |    384   |   100  |    52.242   |    96.3   |           1.914          |          0.5225         |
+|   Large   |      64      |    512   |   100  |    41.950   |    96.0   |           2.384          |          0.4195         |
 
 ## What Must be Returned
-In addition to the performance benchmark LAMMPS output log files, LAMMPS output log files from the two validation runs should also be included in the File Response.
+In addition to the performance benchmark LAMMPS output log files, LAMMPS output log files from the two validation runs should also be included in the File Response. Below is a summary list of the minimum set of requested runs:
+
+For Validation:
+* Medium benchmark single run, standard nodes
+* Medium benchmark single run, accelerated nodes
+
+For Performance:
+* Medium benchmark scaling series, standard nodes
+* Medium benchmark scaling series, accelerated nodes
+* Large benchmark scaling series, standard nodes
+* Large benchmark scaling series, accelerated nodes
 
