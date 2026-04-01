@@ -26,7 +26,7 @@ The specific implementation of the CCL benchmark depends on the proposed hardwar
 * RCCL tests: https://github.com/ROCm/rocm-systems/tree/develop/projects/rccl-tests
 * Intel OneCCL tests: https://www.intel.com/content/www/us/en/docs/oneccl/benchmark-user-guide/2021-14/benchmark.html
 
-If an open-source implementation of CCL tests is not available, then the offeror may provide another implementation, but must report exactly how it was built & run, including the source code and any relevant scripts. The implementation must follow the rules outlined in the "baseline/ported/optimized" definitions in the technical specifications. Specifically, the implementation cannot use unknown or unpublished libraries, and any language interface or architecture-specific language constructs used must be well-documented and publically available at the time of machine arrival.
+If an open-source implementation of CCL tests is not available, then the offeror may provide another implementation, but must report exactly how it was built & run, including the source code and any relevant scripts. The implementation must follow the rules outlined in the "baseline/ported/optimized" definitions in the technical specifications. Specifically, the implementation cannot use unknown or unpublished libraries, and any language interface or architecture-specific language constructs used must be well-documented and publicly available at the time of machine arrival.
 
 ### Tests
 
@@ -34,21 +34,23 @@ Two types of runs are requested to satisfy this benchmark: single-node and multi
 
 #### Single-node
 
-To demonstrate intra-node CCL performance, each collective should be run across all available accelerated devices within a single node.
+To demonstrate intra-node CCL performance, each collective should be run across all available accelerated devices within a single node (see table below for details).
 
 #### Multi-node
 
-To demonstrate inter-node CCL performance, each collective should be run in two jobs with increasingly large node counts relative to the size of the test system.
+To demonstrate inter-node CCL performance, each collective should be run in two multi-node jobs, one using 2 nodes and another using 15% of nodes proposed by the offerer (see table below for details).
 
 #### Summary of Requested Tests
 
-| Test          | Nodes Used  | Ranks Used        |
-|---------------|-------------|-------------------|
-| AllReduce     | 1           | 1 per accelerator |
-| AllReduce     | 2           | 1 per accelerator |
-| AllReduce     | 15%**       | 1 per accelerator |
+In total, three tests (each consisting of 5 replicates) are required for this benchmark:
 
-**15% of nodes proposed by offeror. If this number exceeds the total number of nodes on the test system, then running the CCL benchmark on all accelerated test nodes satisfies this requirement.
+| Test          | Nodes Used  | Ranks Used        | Number of Replicate Runs |
+|:--            |:--          |:--                | :--                      |
+| AllReduce     | 1           | 1 per accelerator | 5                        |
+| AllReduce     | 2           | 1 per accelerator | 5                        |
+| AllReduce     | 15%**       | 1 per accelerator | 5                        |
+
+**15% of nodes proposed by offeror. If this number exceeds the total number of nodes on the system used for benchmarking, then running the CCL benchmark on all available accelerated test nodes satisfies this requirement.
 
 ### Run Rules
 
@@ -56,7 +58,7 @@ Any run must utilize all available accelerators on each node. For all configurat
 
 ## Benchmark Test Results to Report and Files to Return
 
-**File response:** We request the raw data associated with each CCL run be provided, demonstrating the bandwidth and latency for each message size. An example logfile is provided [below](#logfile-example). Additionally, any environment variables, fabric settings, and/or CCL configuration settings necessary to reproduce the results should be provided. The offeror should distinguish between parameters which may be set by an unprivileged user from those which would be globally set by system adminstrators.
+**File response:** We request the raw data associated with each CCL run be provided, demonstrating the bandwidth and latency for each message size. An example logfile is provided [below](#logfile-example-from-kestrel-reference-run-using-nccl). Additionally, any environment variables, fabric settings, and/or CCL configuration settings necessary to reproduce the results should be provided. The offeror should distinguish between parameters which may be set by an unprivileged user from those which would be globally set by system adminstrators.
 
 **Spreadsheet response:** We request the out-of-place and in-place bandwidth and latencies, as well as high-level information about the system the benchmark was run on, to be reported in a spreadsheet (template [below](#spreadsheet-template)) for the following message sizes (in bytes):
 
