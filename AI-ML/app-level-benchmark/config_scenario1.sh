@@ -14,7 +14,8 @@ export MAX_THREADS=4       # Number of data loading threads per node
 #### BASELINE/PORTED: DO NOT CHANGE THESE! ####
 export LOGGING_FREQUENCY=1 # Must be set to 1 for 'Scenario 1'
 export MAX_EPOCHS=3        # Must be set to 3 for 'Scenario 1'
-export LOCAL_BATCH_SIZE=12 # Per-accelerator batch size
+export LOCAL_BATCH_SIZE=12 # Per-accelerator training batch size
+export LOCAL_VALIDATION_BATCH_SIZE=$LOCAL_BATCH_SIZE # Per-accelerator validation batch size (do not modify)
 export START_LR=0.0001     # Starting learning rate. Roughly 10X lower than target end LR.
 export LR_SCHEDULE_TYPE="cosine_annealing" # Learning rate scheduler type
 export LR_WARMUP_STEPS=0   # Not necessary to set for 'Scenario 1'

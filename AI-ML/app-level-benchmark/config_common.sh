@@ -17,8 +17,7 @@ export LR_WARMUP_FACTOR=1.
 # data parameters
 export SHUFFLE_MODE="global"
 export DATA_FORMAT="dali-numpy"
-export PRECISION_MODE="amp"
-export LOCAL_VALIDATION_BATCH_SIZE=8
+export PRECISION_MODE="amp"      # do not change
 
 # staging parameters
 if [ ! -z $STAGE_DIR_PREFIX ]; then 

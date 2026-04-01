@@ -45,13 +45,13 @@ pip3 install torch torchvision torchaudio --index-url https://download.pytorch.o
 
 Install the DeepCAM Python package dependencies from pip and/or conda on inside the PyTorch environment from step 1. For an example, see the Slurm script [`prep-env-kestrel.sh`](prep-env-kestrel.sh) for reference instructions on how we created the appropriate PyTorch environment to run the DeepCAM benchmark. Note that on Kestrel, we explicitly compile PyTorch against a system module for NCCL that is configured to work with the HPE Slingshot network (`nccl/2.23.4_cuda124`) rather than using a precompiled version from pip. This step may not be necessary depending on the Offeror's hardware and network configuration.
 
-The training scripts for DeepCAM do not require any special installation once the above environment is created. For convenience, this repository contains a lightly modified version of [the NVIDIA submission to MLCommons HPC Results v3.0](https://github.com/mlcommons/hpc_results_v3.0/tree/main/NVIDIA/benchmarks/deepcam/implementations/pytorch) (in `deepcam-mlcommons-hpcv3/`) to enable DeepCAM to run with newer versions (>=2.3.0) of PyTorch (specifically, by updating the calls to `MultiStepLRWarmup` and `CosineAnnealingLRWarmup` in `schedulers.py` to reflect the newer API). As demonstrated in the chunk above, the `io_helpers` package can also be installed from the submitted NVIDIA implementation folder.
+The training scripts for DeepCAM do not require any special installation once the above environment is created. For convenience, this repository contains a lightly modified version of [the NVIDIA submission to MLCommons HPC Results v3.0](https://github.com/mlcommons/hpc_results_v3.0/tree/main/NVIDIA/benchmarks/deepcam/implementations/pytorch) (in `deepcam-mlcommons-hpcv3/`) to enable DeepCAM to run with newer versions (>=2.3.0) of PyTorch (specifically, by updating the calls to `MultiStepLRWarmup` and `CosineAnnealingLRWarmup` in `schedulers.py` to reflect the newer API). Training scripts for DeepCAM submissions must be either forked from a [DeepCAM model training implementation hosted by MLCommons HPC Results v3.0](https://github.com/mlcommons/hpc_results_v3.0/tree/main) or obtained from the `deepcam-mlcommons-hpcv3` folder in this repository. As demonstrated in [`prep-env-kestrel.sh`](prep-env-kestrel.sh), the `io_helpers` package can also be installed from the submitted NVIDIA implementation folder.
 
 Note: The specific packages mentioned in [`prep-env-kestrel.sh`](prep-env-kestrel.sh) may change depending on the type of accelerator being tested. As per our [general baseline run rules](../../README.md#draft-definitions-for-baselineas-is-ported-and-optimized-runs), the Offeror may freely substitute publicly available packages/libraries (and their subsequent calls in the training code itself) as necessary for baseline submissions.
 
 ### Step 3: Download and preprocess training data
 
-Input training data can be downloaded via Globus using the [endpoint linked here](https://app.globus.org/file-manager?origin_id=0b226e2c-4de0-11ea-971a-021304b0cca7&origin_path=%2F). Note that the training data requires roughly 10TB of storage and contains HDF5-formatted files for training, validation, and test splits. 
+Input training data can be downloaded via Globus using the [endpoint linked here](https://app.globus.org/file-manager?origin_id=0b226e2c-4de0-11ea-971a-021304b0cca7&origin_path=%2F). Note that the training data requires roughly 10TB of storage and contains HDF5-formatted files for training, validation, and test splits. Instructions for installing a Globus Connect Personal endpoint can be found [here](https://docs.globus.org/globus-connect-personal/install/linux/).
 
 Before training can occur, submitters must convert the HDF5-formatted input data into numpy format, following guidance from MLCommons HPC Results v3.0. Please see [`preprocess-deepcam-data.sh`](./preprocess-deepcam-data.sh) for instructions on how to preprocess the input data accordingly.
 
@@ -93,7 +93,7 @@ To run the DeepCAM benchmark, modify the provided `run_and_time_kestrel.sh` scri
 
 For *baseline* submissions, please use the following default runtime parameters set in [`config_scenario1.sh`](./config_scenario1.sh) or [`config_scenario2.sh`](./config_scenario2.sh) (see above), which is what we deploy on Kestrel. You will need to set the variables marked under the `# user inputs` sections appropriately (e.g., input/output locations for the run). 
 
-Training scripts for *baseline* submissions must be forked from a [DeepCAM model training implementation hosted by MLCommons HPC Results v3.0](https://github.com/mlcommons/hpc_results_v3.0/tree/main). Using additional Python packages (i.e., anything other than what is required for PyTorch and the DeepCAM training scripts) is *not* allowed for baseline submissions.
+Using additional Python packages (i.e., anything other than what is required for PyTorch and the DeepCAM training scripts) is *not* allowed for baseline submissions. It is not allowed to modify the `PRECISION_MODE` that is set in [`config_common.sh`](./config_common.sh) for baseline submissions.
 
 #### Baseline Scenario 1
 
@@ -162,13 +162,13 @@ For *ported* submissions, the *baseline* parameters must be used, though trainin
 
 ## Benchmark test results to report and files to return
 
-**We will provide a convenience wrapper script to extract the data requested to be reported from each DeepCAM submission scenario at a later date.**
+We request the raw runtime logs for each training run in Scenario 1 and Scenario 2, in addition to the summarized tables in the following sections. **We will provide a convenience wrapper script to extract the data requested to be reported from each DeepCAM submission scenario for the tables below at a later date.**
 
 ### Scenario 1 submissions
 
 Noting the median time required per training step (in seconds) across 5 epochs satisfies this submission. This time should **solely** reflect the time spent during training itself. In other words, this excludes the time required for model initiation and the time spent staging data to local disks for faster I/O. 
 
-For each run following Scenario 1 rules, we request the following information in the table below. 
+For each run following Scenario 1 rules, we request the following information in the table below (using unoptimized Kestrel reference data as an example): 
 
 | Run Type  | Scenario | Nodes used | Replicate | Accelerators per node | Total Accelerators | Local Batch Size | Data staged | Median time per training step (seconds)  |
 | :---      | :---     | :---       | :---      | :---                  | :---               | :---             | :---        | :---                                     |

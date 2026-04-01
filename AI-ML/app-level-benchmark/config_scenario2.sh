@@ -9,7 +9,8 @@ export OUTPUT_DIR="/scratch/$USER/DeepCAM-testing/results/$SLURM_JOB_ID" # outpu
 export WIREUP_METHOD="nccl-slurm"
 export DGXNGPU=4           # Number of accelerators per node
 export MAX_THREADS=4       # Number of data loading threads per node
-export LOCAL_BATCH_SIZE=12 # Per-accelerator batch size (`DGXNGPU`\*`NUMBER_OF_NODES`\*`LOCAL_BATCH_SIZE` must equal `1024`
+export LOCAL_BATCH_SIZE=12 # Per-accelerator training batch size (`DGXNGPU`\*`NUMBER_OF_NODES`\*`LOCAL_BATCH_SIZE` must equal `1024`
+export LOCAL_VALIDATION_BATCH_SIZE=$LOCAL_BATCH_SIZE # Per-accelerator validation batch size (do not modify)
 ####
 
 #### BASELINE/PORTED: DO NOT CHANGE THESE! ####
