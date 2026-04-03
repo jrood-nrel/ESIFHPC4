@@ -5,7 +5,7 @@ try:
     from tabulate import tabulate
 except ModuleNotFoundError:
     print("Could not find the 'tabulate' package")
-    print("To fix this error, run 'pip install tabulate' in this environment")
+    print("To fix this error, run, e.g., 'pip install tabulate' in this environment")
     raise
 
 
@@ -26,14 +26,15 @@ def get_command_line_args():
 def print_table(data):
 
     header = [
-        "MPI Tasks",
-        "Threads",
-        "Iterations",
-        "Write Time (s)",
-        "Total Time (s)",
+        "Total Physical Cores",
+        "Threads per Core",
+        "Number of Iterations",
+        "Min Iteration Time (s)",
+        "Total Write Time (s)",
+        "Total Wallclock Time (s)",
     ]
 
-    print(tabulate(data, headers=header, floatfmt=".1f", stralign="right"))
+    print(tabulate(data, headers=header, floatfmt=(None, None, None, ".4f", ".1f", ".1f"), stralign="right"))
 
 
 def extract_time_from_line(line):
@@ -55,6 +56,7 @@ def process_rsl_error_files(rsl_filenames):
         total_time = 0.0
         write_time = 0.0
         alt_write_time = 0.0
+        min_timing = None
 
         num_iterations = 0
 
@@ -68,6 +70,9 @@ def process_rsl_error_files(rsl_filenames):
                         alt_write_time += timing
 
                     num_iterations += 1
+
+                    if min_timing is None or timing < min_timing:
+                        min_timing = timing
 
                 elif "Timing for Writing" in line:
                     timing = extract_time_from_line(line)
@@ -87,6 +92,7 @@ def process_rsl_error_files(rsl_filenames):
             num_mpi_tasks,
             num_threads,
             num_iterations,
+            min_timing,
             write_time,
             total_time,
         ]
