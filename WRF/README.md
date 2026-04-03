@@ -159,13 +159,13 @@ This script combs through the rsl.error.0000 file(s) specified with the `--rsl_f
 
 ### 3.2: Validation
 
-The 2.5-km CONUS benchmark downloaded in Step 2.1 includes validation files and a comparison script which can be used to check the accuracy of the outputs generated on the test system. To compare the output from the test system to the expected/truth values, call:
+The 2.5-km CONUS benchmark downloaded in Step 2.1 includes validation files and a comparison script, `diffwrf.py`, which can be used to check the accuracy of the outputs generated on the test system. To compare the output from the test system to the expected/truth values, call:
 
 ```bash
 python diffwrf.py wrfout_d01_2019-11-27_00:00:00.gnu ${WRF_DIR}/conus2.5km-mpi-04/wrfout_d01_2019-11-27_00:00:00 
 ```
 
-where the first file for comparison is included in the 2.5-km CONUS benchmark and the second file is the path to the same output produced during a benchmark test. The output for the first three rows should resemble:
+where the first file for comparison is the truth value provided in the 2.5-km CONUS benchmark and the second file is the path to the corresponding output produced during a benchmark test. This produces a table of differences like:
 
 ```
 Variable Name                Minimum      Maximum      Average      Std Dev        Skew
@@ -173,10 +173,17 @@ Variable Name                Minimum      Maximum      Average      Std Dev     
 U                            -22.0344      27.2559  5.30677e-05     0.212149      1.84733
 V                            -22.3367      20.7461  -5.0188e-05      0.19031    -0.776346
 W                            -15.9739      17.8383  6.06832e-07    0.0500144      2.72236
-...
+T                            -8.28601      8.34177 -0.000186089    0.0767748     -0.23419
+PH                           -204.225      315.059    0.0101462      2.55674      1.79318
+QVAPOR                    -0.00646876   0.00641035  3.54073e-08  3.76791e-05      1.42822
+TSLB                        -0.855652     0.476471  0.000431951    0.0121961     -1.86979
+MU                           -202.967      251.698     0.322963      3.92829      2.72038
+TSK                          -11.8504      11.0875   -0.0142023     0.188032    -0.188382
+RAINC                               0            0            0            0          nan
+RAINNC                       -25.8533      14.5624  0.000636897     0.157786     -27.9334
 ```
 
-The average (middle column) is expected to be close to zero for all quantities, though the exact deviations vary with WRF version, compiler, and numerous other factors. Average differences >1.0E-3 in the U, V, or W variables will be considered to have failed the validation test.
+where the average (middle column) is expected to be close to zero for all quantities, though the exact deviations vary with WRF version, compiler, and numerous other factors. Average differences >1.0E-3 in the U, V, or W variables will be considered to have failed the validation test. The full table of outputs, formatted as shown above, should be saved to a file and returned as part of the response per each of the runs requested below. 
 
 ---
 
