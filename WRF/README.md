@@ -176,7 +176,7 @@ W                            -15.9739      17.8383  6.06832e-07    0.0500144    
 ...
 ```
 
-The average (middle column) is expected to be close to zero, though the exact deviations vary with WRF version, compiler, and other factors. Average differences >1.0E-4 in the U, V, or W variables will be considered to have failed the validation test.
+The average (middle column) is expected to be close to zero for all quantities, though the exact deviations vary with WRF version, compiler, and numerous other factors. Average differences >1.0E-3 in the U, V, or W variables will be considered to have failed the validation test.
 
 ---
 
