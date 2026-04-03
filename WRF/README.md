@@ -116,7 +116,30 @@ io_form_history                     = 11,
 io_form_restart                     = 11,
 ```
 
-Save and close the file once changes are applied. From here, the benchmark is ready to run.
+Save and close the file once changes are applied. **Note that these are the only changes allowed in the input file for** ["As-Is" benchmarking responses](../README.md#draft-definitions-for-baselineas-is-ported-and-optimized-runs). From here, the benchmark is ready to run. An example `submit_job.sbatch` file is included below, along with the line line submitting the job to the scheduler. As a reminder, the modules loaded below are specifc to the reference system, but enable the toolchain outlined in Step 1.3.
+
+```bash
+#!/bin/bash
+#SBATCH --account=<allocation>
+#SBATCH --time=4:00:00
+#SBATCH --nodes=2
+#SBATCH --exclusive
+#SBATCH --mem=0
+
+module purge
+module load PrgEnv-gnu/8.5.0
+module load netcdf/4.9.3-cray-mpich-gcc
+
+export OMP_NUM_THREADS=1
+
+srun -n 192 ./wrf.exe
+```
+
+
+```bash
+sbatch submit_job.sbatch
+```
+
 
 ---
 
@@ -134,6 +157,27 @@ python get_timing.py --rsl_file=${WRF_DIR}/conus2.5km-mpi-02/rsl.error.0000 --rs
 
 This script combs through the rsl.error.0000 file(s) specified with the `--rsl_file` flag and extracts the timing results per each step of the algorithm, delineating the steps where file writing was performed since this adds an appreciable amount of time. Note that the `tabulate` package is required to run this script. If it is not already installed in your Python environment, simply do `pip install tabulate`.
 
+### 3.2: Validation
+
+The 2.5-km CONUS benchmark downloaded in Step 2.1 includes validation files and a comparison script which can be used to check the accuracy of the outputs generated on the test system. To compare the output from the test system to the expected/truth values, call:
+
+```bash
+python diffwrf.py wrfout_d01_2019-11-27_00:00:00.gnu ${WRF_DIR}/conus2.5km-mpi-04/wrfout_d01_2019-11-27_00:00:00 
+```
+
+where the first file for comparison is included in the 2.5-km CONUS benchmark and the second file is the path to the same output produced during a benchmark test. The output for the first three rows should resemble:
+
+```
+Variable Name                Minimum      Maximum      Average      Std Dev        Skew
+=========================================================================================
+U                            -22.0344      27.2559  5.30677e-05     0.212149      1.84733
+V                            -22.3367      20.7461  -5.0188e-05      0.19031    -0.776346
+W                            -15.9739      17.8383  6.06832e-07    0.0500144      2.72236
+...
+```
+
+The average (middle column) is expected to be close to zero, though the exact deviations vary with WRF version, compiler, and other factors. Average differences >1.0E-4 in the U, V, or W variables will be considered to have failed the validation test.
+
 ---
 
 ## Run Definitions and Requirements
@@ -141,30 +185,30 @@ This script combs through the rsl.error.0000 file(s) specified with the `--rsl_f
 
 Benchmarking WRF requires reporting these timing results from two sets of runs each comprised of 5 test cases for a total of 10 runs. The first set of runs uses pure MPI parallelism (i.e., one OpenMP thread per MPI task) and tests strong scaling performance across 1, 2, 4, 8, and 16 nodes. The Offeror may adjust the total number of MPI tasks, but note that in each case, *at least 80% of the physical cores per every node must be utilized* for baseline submissions. The second set of runs uses hybrid OpenMP + MPI parallelism (i.e., 4 threads per MPI task) and tests strong scaling performance across the same 1, 2, 4, 8, and 16 node jobs. Note that a combination of MPI tasks/threads per task is valid for baseline submissions as long as the total number of physical cores meets or exceeds 80% of available per node. For optimized submissions, any number of physical cores may be used.
 
-For these required cases, report the number of MPI tasks, number of threads, number of iterations during the calculation, total write time, and total time in the reporting spreadsheet (the `get_timing.py` script provides all these outputs). Optionally, the Offeror may include a set of additional "Optimized" cases that use different OpenMP:MPI ratios, node saturations, `namelist.input` specifications, building instructions, etc., provided any details and/or instructions necessary to reproduce these results are provided as explained in the [definition of "Optimized"](../README.md#draft-definitions-for-baselineas-is-ported-and-optimized-runs).
+For these required cases, report the number of MPI tasks, number of threads, number of iterations during the calculation, minimum time of one iteration, total write time, and total time in the reporting spreadsheet (the `get_timing.py` script provides all these outputs). Optionally, the Offeror may include a set of additional "Optimized" cases that use different OpenMP:MPI ratios, node saturations, `namelist.input` specifications, building instructions, etc., provided any details and/or instructions necessary to reproduce these results are provided as explained in the [definition of "Optimized"](../README.md#draft-definitions-for-baselineas-is-ported-and-optimized-runs).
 
 For clarity and comparison, we include the summarized results of carrying out the required benchmarks on the Kestrel HPC below. The output of running the `get_timing.py` script on the 5 `rsl.error.0000` files for the pure MPI tests is:
 
 ```
-  MPI Tasks    Threads    Iterations    Write Time (s)    Total Time (s)
------------  ---------  ------------  ----------------  ----------------
-         96          1          1440              71.0            7210.9
-        192          1          1440              87.4            3768.1
-        384          1          1440              64.7            1903.9
-        768          1          1440              84.1            1054.7
-       1536          1          1440              85.2             574.1
+  Total Physical Cores    Threads per Core    Number of Iterations    Min Iteration Time (s)    Total Write Time (s)    Total Wallclock Time (s)
+----------------------  ------------------  ----------------------  ------------------------  ----------------------  --------------------------
+                    96                   1                    1440                    3.7502                    71.0                      7210.9
+                   192                   1                    1440                    1.9226                    87.4                      3768.1
+                   384                   1                    1440                    0.9363                    64.7                      1903.9
+                   768                   1                    1440                    0.4638                    84.1                      1054.7
+                  1536                   1                    1440                    0.2248                    85.2                       574.1
 ```
 
 The output of running the `get_timing.py` script on the 5 `rsl.error.0000` files for the hybrid OpenMP + MPI tests is:
 
 ```
-  MPI Tasks    Threads    Iterations    Write Time (s)    Total Time (s)
------------  ---------  ------------  ----------------  ----------------
-         24          4          1440              49.9            6809.0
-         48          4          1440              53.6            3526.0
-         96          4          1440              38.7            1747.9
-        192          4          1440              40.9             888.3
-        384          4          1440              46.5             480.4
+  Total Physical Cores    Threads per Core    Number of Iterations    Min Iteration Time (s)    Total Write Time (s)    Total Wallclock Time (s)
+----------------------  ------------------  ----------------------  ------------------------  ----------------------  --------------------------
+                    24                   4                    1440                    3.6803                    49.9                      6809.0
+                    48                   4                    1440                    1.8369                    53.6                      3526.0
+                    96                   4                    1440                    0.8643                    38.7                      1747.9
+                   192                   4                    1440                    0.4136                    40.9                       888.3
+                   384                   4                    1440                    0.1906                    46.5                       480.4
 ```
 
 Additionally, the 10x `rsl.error.0000` files necessary to produce these tables are [included here](conus_2.5km/example_outputs/). Visualizing these outputs provides a clearer picture of reasonable scaling performance up to 16 nodes.
