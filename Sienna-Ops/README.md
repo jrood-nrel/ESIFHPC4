@@ -26,8 +26,8 @@ Sienna requires Julia as the primary programming language and depends on several
 1. Install Julia from [JuliaLang.org](https://julialang.org/). Specifically, we recommend using the [Manual Downloads](https://julialang.org/downloads/manual-downloads/), and selecting the current stable release appropriate for the target architecture. Below we show two options for building the Julia environment (in our tests we used Julia v1.12.5). 
 
 #### Option 1: Use existing Project.toml and Manifest.toml files
-2. Instantiate the `Project.toml` and `Manifest.toml` files in this directory. On 
-the terminal, assuming that you are in `/project/dir` = `ESIFHPC4/Sienna-Ops/benchmarks`
+2. Instantiate the `Project.toml` and `Manifest.toml` files in this directory. In 
+terminal, assuming that you are in `/project/dir` = `ESIFHPC4/Sienna-Ops/benchmarks`, do
    ```shell
    julia --project=.
    ```
@@ -38,71 +38,75 @@ the terminal, assuming that you are in `/project/dir` = `ESIFHPC4/Sienna-Ops/ben
 
 
 #### Option 2: Build your own Julia environment (with exact versions we used) via setup.jl
-   ```
-   cd /project/dir
-   julia setup.jl
-   ```
+Either
+```
+cd ESIFHPC4/Sienna-Ops/benchmarks
+rm Project.toml
+rm Manifest.toml
+julia setup.jl
+```
+Or in a new project dir
+```
+cd /project/dir
+julia setup.jl
+```
+
 #### Option 3: Build your own Julia environment(flexible, less pinned versions) via REPL
+Similarly, either delete existing `Project.toml` and `Manifest.toml` in `ESIFHPC4/Sienna-Ops/benchmarks` dir or start in a new project dir.
+Add the required packages using the Julia package manager:
+```
+cd ESIFHPC4/Sienna-Ops/benchmarks
+rm Project.toml
+rm Manifest.toml 
+julia --project=.
+]
+activate .
 
-2. Add the required packages using the Julia package manager:
-   ```
-   cd /project/dir
-   julia --project=.
-   ]
-   activate .
-   add PowerSystems@5 PowerSimulations@0.32 PowerSystemCaseBuilder@2
+add PowerSystems@5 PowerSimulations@0.32 PowerSystemCaseBuilder@2 HiGHS HydroPowerSimulations Ipopt PowerAnalytics PowerGraphics
 
-   add HiGHS HydroPowerSimulations Ipopt PowerAnalytics PowerGraphics
-   
-   instantiate
-   status
-   ```
+instantiate
+status
+```
 
 
-### Instructions on how to run the Sienna benchmark:
+### Instructions on how to run the Sienna benchmark
 
-#### Running the benchmark from the command line (can ignore all Info and Warning messages)
+#### Running the benchmark from the command line (ignore all Info and Warning messages)
 1. Run the benchmark as follows
-   ```
-   julia --threads=auto --project=. run_RTS_UC-ED.jl
-   ```
+```
+cd ESIFHPC4/Sienna-Ops/benchmarks
+julia --threads=auto --project=. run_RTS_UC-ED.jl
+```
 
 #### How we ran this benchmark on Kestrel (TODO):
 1. Modify and run the sbatch file `run_benchmarks.sh` as follows
 
-   ```shell
-   sbatch run_benchmarks.sh 1 
-   sbatch run_benchmarks.sh auto
-   ```
+```shell
+sbatch run_benchmarks.sh 1 
+sbatch run_benchmarks.sh auto
+```
 
 Note: The argument after `run_benchmarks.sh` specifies how many threads julia should be started with. By default, Julia uses only one thread. Setting the number of threads to `auto` means that Julia will set the number of threads to be equal to the number of cores on the system.
 
 ## Run Definitions and Requirements
 
-- The benchmark includes:
-  - Unit Commitment and Economic Dispatch simulations using `PowerSimulations.jl`.
+- The benchmark runs 2 days of PCM simulation: 2 Unit Commitment and 2x96 Economic Dispatch simulations using `HiGHS` and `Ipopt` solvers respectively.
 - The `run_RTS_UC-ED.jl` script is compatible with `PowerSystems v5` and `PowerSimulations v0.32`. While it is possible to use other package versions, parsing errors might occur. 
  
 
 ## Run Rules
-
 - The Benchmark is single node only.
 - GPU-compatible Optimizers that are compatible with Julia JuMP may be exercised on GPU nodes if desired. However, this is not a requirement.
-- This benchmark has been set up to run using two open source solvers: IPOPT and HiGHS. Proprietary solvers such as Gurobi and Xpress may be used instead, but are not required.
+- This benchmark has been set up to run using two open source solvers: `HiGHS` and `Ipopt`. Proprietary solvers such as `Gurobi` and `Xpress` may be used instead, but are not required.
 
 ## Benchmark test results to report and files to return
 
-The `run_RTS_UC-ED.jl` functionality script will  create simulation results and plots in `RTS-store` and `RTS-plots` dirs. Each run `k`, of the script will create a new dir `rts-test<k>`, inside `RTS-store` and `RTS-plots` dirs (or `cleanup.sh` to remove previous run results). These directories with at least one successful run `rts-test` are to be returned. To check for correctness/functionality:
-1.  Script `run_RTS_UC-ED.jl` finishes without errors and at the end, in an interactive session, you see:
+The `run_RTS_UC-ED.jl` script will create simulation results and plots in `RTS-store` and `RTS-plots` dirs, respectively. Each run `k`, of the script will create a new dir `rts-test<k>`, inside `RTS-store` and `RTS-plots` dirs (or `cleanup.sh` to remove previous run results). These directories with at least one successful run `rts-test` are to be returned. To check for correctness (successful functionality test):
+1.  Script `run_RTS_UC-ED.jl` finishes without errors and at the end of an interactive session, you see:
 <img src="images/interactive_sim_end.png" alt="Plot of results" width="700"/>
 
-2. Two plots, `UC.png` and `ED.png` look similar to these:
+2. Two plots, `UC.png` and `ED.png` inside `RTS-plots/rts-test/` look similar to these:
 <img src="images/UC.png" alt="Plot of results" width="700"/>
 <img src="images/ED.png" alt="Plot of results" width="700"/>
 
 
-Plots in `RTS-plots/rts`
-
- you run the script it will create `rts-test<N>` `RTS-plots` directory will  memory, and allocation data that can be inspected visually for comparison. An output summary text file and CSV file are created in `small/benchmark_results` that include these data. These are the files to return. We emphasize, however, that this is only a functionality test, and will not be judged by computation time, answer correctness, etc.
-
-Also produced by our script `run_benchmarks.sh` is a file containing information printed by Sienna during the solve process (e.g., fout_RTS_UC-ED_auto.out). This file is not required. 
