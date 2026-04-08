@@ -36,11 +36,12 @@ This should install all the packages needed to run the benchmark
 
 
 #### Option 2: Build your own Julia environment (with exact versions we used) via setup.jl
+Will create fresh `Project.toml` and `Manifest.toml`
 Either
 ```
 cd ESIFHPC4/Sienna-Ops/benchmarks
-rm Project.toml
-rm Manifest.toml
+mv Project.toml Project.toml.bak
+mv Manifest.toml Manifest.toml.bak
 julia setup.jl
 ```
 Or in a new project dir
@@ -49,13 +50,13 @@ cd /project/dir
 julia setup.jl
 ```
 
-#### Option 3: Build your own Julia environment(flexible, less pinned versions) via REPL
-Similarly, either delete existing `Project.toml` and `Manifest.toml` in `ESIFHPC4/Sienna-Ops/benchmarks` dir or start in a new project dir.
+#### Option 3: Build your own Julia environment (with flexible, less pinned versions) via REPL pkg manager.
+Will create fresh `Project.toml` and `Manifest.toml`
 Add the required packages using the Julia package manager:
 ```
 cd ESIFHPC4/Sienna-Ops/benchmarks
-rm Project.toml
-rm Manifest.toml 
+mv Project.toml Project.toml.bak
+mv Manifest.toml Manifest.toml.bak
 julia --project=.
 ]
 activate .
