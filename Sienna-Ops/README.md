@@ -26,15 +26,13 @@ Sienna requires Julia as the primary programming language and depends on several
 1. Install Julia from [JuliaLang.org](https://julialang.org/). Specifically, we recommend using the [Manual Downloads](https://julialang.org/downloads/manual-downloads/), and selecting the current stable release appropriate for the target architecture. Below we show two options for building the Julia environment (in our tests we used Julia v1.12.5). 
 
 #### Option 1: Use existing Project.toml and Manifest.toml files
-2. Instantiate the `Project.toml` and `Manifest.toml` files in this directory. In 
-terminal, assuming that you are in `/project/dir` = `ESIFHPC4/Sienna-Ops/benchmarks`, do
-   ```shell
-   julia --project=.
-   ```
-   ```julia
-   ] instantiate
-   ```
-   This should install all the packages needed to run the benchmark
+In terminal do:
+```
+cd ESIFHPC4/Sienna-Ops/benchmarks 
+julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.build()'
+```
+
+This should install all the packages needed to run the benchmark
 
 
 #### Option 2: Build your own Julia environment (with exact versions we used) via setup.jl
