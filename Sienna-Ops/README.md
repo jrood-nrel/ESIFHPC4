@@ -76,7 +76,7 @@ cd ESIFHPC4/Sienna-Ops/benchmarks
 julia --threads=auto --project=. run_RTS_UC-ED.jl
 ```
 
-#### How we ran this benchmark on Kestrel (TODO):
+#### How we ran this benchmark on Kestrel:
 1. Modify and run the sbatch file `run_benchmarks.sh` as follows
 
 ```shell
