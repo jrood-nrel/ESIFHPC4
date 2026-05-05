@@ -2,52 +2,88 @@
 
 ## Purpose and Description
 
-- stream.[c,f] in stream.org are the standard memory bandwith test.
-- pstream.c is a variation of stream designed to test the abillity to get good processor affinity.
-- mstream.cu and stream.cu are GPU versions of stream.c
+This benchmark test collection measures sustainable memory bandwidth on CPU and accelerator devices using STREAM.
 
-The minimum tests to be run are stream.[c,f].  These are found in the directory 
-stream.org.  The directory stream.org/testrun1 contains an example run script, 
-test.sh, and outputs.  This can be used as the basis for a vendors runs.
+The benchmark scope in this repository is:
+1. CPU STREAM test (required)
+2. Accelerator-based stream test (required)
+3. CPU affinity verification using MPI+OpenMP STREAM TRIAD (`pstream`, optional)
 
-If a vendor wishes to provide GPU nodes then stream.cu, or a vendor's similar
-code should be run.  The source code, run scripts, environmental setting sould
-be provided along with outputs. The program mstream.cu is a simple MPI extension
-to stream.cu that can run on a collection of GPUs in parallel.
+Reference implementations included in this repository:
+- `stream/stream.org/` contains C and Fortran CPU STREAM implementations (`stream.c`, `stream.f`) and a complete worked example in `stream/stream.org/testrun1/`.
+- `stream/pstream/pstream.c` extends STREAM to expose task/thread/core placement quality.
+- `stream/pstream/stream.cu` and `stream/pstream/mstream.cu` provide single-GPU and MPI multi-GPU STREAM-style runs.
+
+Offerors may use equivalent implementations (including vendor-optimized versions), but must follow the run definitions and reporting requirements below and return all build/run artifacts used to generate reported numbers.
 
 ## Licensing Requirements
 
-Open source
-
-## Other Requirements
-
-mstream.cu and stream.cu require GPUs
+Open source per https://www.cs.virginia.edu/stream/FTP/Code/LICENSE.txt
 
 ## How to build
 
-Build procedures are described in the source directories. Complete examples can be found
-in the test-run directories.  
+Build procedures for the reference implementations are described in the source directories. Complete examples can be found in the test-run directories.  
 
 ## Run Definitions and Requirements
 
-There are no criteria/acceptable thresholds except for pstream.c It must show that
-there is good affinity mapping with no cores oversubscribed.
+### Test 1: CPU STREAM test - required
 
-## How to run
+Additional information on Test 1 may be found in `stream/stream.org/README.md` of this repository, including build and run instructions, reporting instructions, and example scripts for our provided reference implementations. The script `post.py` found at `stream/stream.org/testrun1/post.py` may be used to process the output files and report results. Instructions on using `post.py` are found in `stream/stream.org/README.md`.
 
-Run procedures are described in the source directories.
+For baseline submissions, the following test configurations should be reported:
 
-### Tests
+Run configurations using the following memory size requirements:
+1. Default STREAM memory size
+2. A large-memory case using at least 80% of total DRAM on a node
 
-* stream.c - standard stream bechnmark
-* stream.f - standard stream bechnmark
-* pstream.c - affinity version of stream benchmark
-* stream.cu - GPU stream
-* mstream.cu - MPI version of GPU stream
+With the following thread count requirements:
+- Run thread counts from 1 to all available cores on-node at evenly-spaced intervals such that six different thread counts are reported (e.g., on the reference machine, we run stream with 1, 24, 44, 64, 84, and 104 threads). If the number of cores on the machine is not divisible by six, then 1 thread, and threads corresponding to all available cores should be used, with four additional thread counts chosen at as evenly-as-possible intervals. 
 
-The files in pstream/amd are alpha versions of AMD gpu tests.  The eventual goal is 
-to merge these codes with mstream.cu.  Suggestions are welcome.
+Results for all of Copy, Scale, Add, and Triad should be returned.
 
-## Benchmark test results to report and files to return
+These results should be returned for all offered CPU node types, including the host CPU of accelerated nodes.
 
-These are also described in the source directory.
+For baseline results, CPU Stream source code must either come from `stream/stream.org` within this repository, or directly from https://www.cs.virginia.edu/stream/. Note that our `stream/stream.org` contains minor source code modifications to `stream.f` to enable larger array sizes and fix a format statement. Any source code changes made to https://www.cs.virginia.edu/stream/ source (i.e., similar format/array size fixes), these changes must be reported. The offeror must use the STREAM kernels as implemented in the source code and not compile the source so that it utilizes external kernel implementations.
+
+For optional optimized submissions, any core count/thread count may be used and any vendor-optimized kernel or stream implementation may be used, while using the above memory size requirements.
+
+### Test 2: Accelerator-based STREAM test - required
+
+Additional information on Test 2 may be found in `stream/pstream/gpustream.md` of this repository. 
+
+We provide reference accelerator-based STREAM implementations for CUDA and hip in `stream/pstream` under `stream.cu`/`mstream.cu` and `stream.hip`/`mstream.hip`. Note that these implementations are not required to be used. If an offeror wishes to submit a GPU STREAM test using their own implementation they may do so. It is not a requirement that the GPU STREAM submission be CUDA- or hip-based. We provide these example implementations for reference.
+
+The offeror must:
+- Use an array size large enough to occupy at least 75% of each GPU memory.
+- Return results for all of Copy, Scale, Add, Triad
+
+Note that `mstream.cu` and `mstream.hip` are reference implementations for an optional MPI-based STREAM that executes on all available devices simultaneously. If the offeror wishes to return a parallel stream that utilizes all devices simultaneously, either via our provided reference implementations or through their own implementation, they may do so, but are not required.
+
+### Test 3: CPU Affinity Verification (`pstream`) - optional
+
+We provide `pstream` here for convenience. It is a STREAM-based reference implementation for demonstrating correct processor affinity behavior, as mentioned in the Technical Specifications.
+
+Additional information on Test 3 may be found in `stream/pstream/pstream.md`.
+
+
+## Benchmark Test Results to Report and Files to Return
+
+### Spreadsheet response
+
+Provide:
+- CPU STREAM: Copy, Scale, Add, and Triad with thread counts, array size, rate (MB/s), and timings reported
+- Accelerator-based STREAM: Copy, Scale, Add, and Triad with number of GPUs (if applicable/if using `mstream`), array size, rate, and timings reported
+- `pstream` (optional): report the number of MPI tasks and threads per task used alongside the rate (triad only) and affinity
+
+
+### File response
+
+Include all artifacts for reported runs:
+- Source modifications (if any)
+- Build scripts/Makefiles
+- Job scripts
+- Output files
+
+### Text response
+
+If applicable, describe any tuning, source modification, and execution details needed to reproduce results, including thread/process placement controls and affinity settings
