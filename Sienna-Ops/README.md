@@ -25,7 +25,8 @@ Sienna requires Julia as the primary programming language and depends on several
 
 1. Install Julia from [JuliaLang.org](https://julialang.org/). Specifically, we recommend using the [Manual Downloads](https://julialang.org/downloads/manual-downloads/), and selecting the current stable release appropriate for the target architecture. Below we show two options for building the Julia environment (in our tests we used Julia v1.12.5). 
 
-#### Option 1: Use existing Project.toml and Manifest.toml files
+#### Option 1 (Recommended): Use existing Project.toml and Manifest.toml files
+**NOTE**: This is the recommended approach. The committed `Manifest.toml` is a full lockfile that pins every package at every level of the dependency tree to exact tested versions, guaranteeing reproducibility regardless of what newer package versions may have been released since.
 In terminal do:
 ```
 cd ESIFHPC4/Sienna-Ops/benchmarks 
@@ -35,7 +36,9 @@ julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.build()'
 This should install all the packages needed to run the benchmark
 
 
-#### Option 2: Build your own Julia environment (with exact versions we used) via setup.jl
+#### Option 2: Build your own Julia environment (with exact versions of direct dependencies only) via setup.jl
+**NOTE**: May break if a new version of an indirect (transitive) dependency is released that is incompatible with the pinned direct dependencies.
+
 Will create fresh `Project.toml` and `Manifest.toml`
 Either
 ```
@@ -51,6 +54,8 @@ julia setup.jl
 ```
 
 #### Option 3: Build your own Julia environment (with flexible, less pinned versions) via REPL pkg manager.
+**NOTE**: May break if a new version of a direct or indirect dependency is released that introduces incompatible changes.
+
 Will create fresh `Project.toml` and `Manifest.toml`
 Add the required packages using the Julia package manager:
 ```
@@ -61,10 +66,13 @@ julia --project=.
 ]
 activate .
 
-add PowerSystems@5 PowerSimulations@0.32 PowerSystemCaseBuilder@2 HiGHS HydroPowerSimulations Ipopt PowerAnalytics PowerGraphics
+add InfrastructureSystems@3.3.2 PowerSystems@5 PowerSimulations@0.32 PowerSystemCaseBuilder@2 HiGHS HydroPowerSimulations Ipopt PowerAnalytics PowerGraphics
 
 instantiate
 status
+
+"Ctrl+D" (exit pkg manager and Julia REPL) 
+
 ```
 
 
