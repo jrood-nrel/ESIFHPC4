@@ -124,7 +124,7 @@ Also of note, when Kynema-SGF is built for the GPU, `fcompare` from that build w
 * The offeror may freely adapt the build and run scripts provided here so long as the `FIXED_ARGS` are not modified and the other run rules in this list are adhered to.
 * For baseline CPU submissions, we request that at least 80% of CPU cores are utilized. Optimized CPU submissions may use any number of cores. Please note that all CPU submissions are optional.
 * Our reference GPU results were obtained with 1 rank per GPU for Kynema-SGF; however, if running multiple ranks per GPU is beneficial, that is allowed.
-* Baseline results must be submitted with Kynema-SGF version 3.9.1. Optimized submissions may use any version.
+* Baseline results must be submitted with Kynema-SGF main branch. Optimized submissions may use any version.
 * All submissions must use only FP64, even though reduced precision capability is available in later releases.
 * For (optional) optimized submissions, any optimizations would be allowed in the code, build, and task configuration as long as the offeror would provide a high-level description of the optimization techniques used and their impact on performance in the response. Please note that this is more permissive than the "default" baseline/ported/optimized rules in that these optimizations do not need to be made available in a "maintainable" form.
 
