@@ -10,18 +10,15 @@ mkdir -p ${OUTPUT_DIR}
 export LR_T_MAX=9000
 export LR_ETA_MIN=0.0
 export LR_WARMUP_FACTOR=1.
-# These variables are only required if LR_SCHEDULE_TYPE="multistep":
-# export LR_MILESTONES=""
-# export LR_DECAY_RATE=""
 
 # data parameters
 export SHUFFLE_MODE="global"
-export DATA_FORMAT="dali-numpy"
-export PRECISION_MODE="amp"
+export DATA_FORMAT=${DATA_FORMAT:-"dali-numpy"}
+export PRECISION_MODE=${PRECISION_MODE:-"amp"}
 export LOCAL_VALIDATION_BATCH_SIZE=8
 
 # staging parameters
-if [ ! -z $STAGE_DIR_PREFIX ]; then 
+if [ ! -z $STAGE_DIR_PREFIX ]; then
   mkdir -p $STAGE_DIR_PREFIX
 fi
 export STAGE_BATCH_SIZE=8
@@ -61,7 +58,7 @@ export NEXP=1
 export NUM_INSTANCES=1
 export gpu_config=${TOTALGPUS}
 
-##### DO NOT MODIFY THESE VARIABLES - parameters for run script based on values set above ##### 
+##### DO NOT MODIFY THESE VARIABLES - parameters for run script based on values set above #####
 # LR switch
 if [ -z ${LR_SCHEDULE_TYPE} ]; then
     lr_schedule_arg=""
