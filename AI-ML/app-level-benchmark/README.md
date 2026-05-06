@@ -71,8 +71,8 @@ There are three types of submissions possible for this benchmark: *baseline*, *p
 
 The ESIF-HPC-4 DeepCAM benchmark encompasses **two** types of scenarios:
 
-- **Scenario 1.** The *local* (i.e., per-device) batch size is fixed to `12`. In this scenario, the reported metric is the average time required per training step over 3 epochs. Device-level "weak scaling" is intended to be measured in this scenario; this test should span *N*, *4N*, and *8N* nodes (in which *N* may equal 1) accordingly. We ask for 3 replicates for each node size, for a total of 9 runs. Model convergence is **not** required in this scenario. This scenario requires enabling verbose, per-step logging via the environment variable `LOGGING_FREQUENCY` - see [below](#baseline-scenario-1).
-- **Scenario 2.** The *global* batch size is fixed to `1024`, with no specific requirement on the local batch size accordingly. In this scenario, the reported metric is the time required to reach an evaluation accuracy of 82%. This test should span *M*, *4M*, and *8M* nodes (in which *M* may equal 1) accordingly (*N* and *M* may vary between Scenario 1 and Scenario 2). We ask for 3 replicates for each node size, for a total of 9 runs. **Results from Scenario 2 are what will be considered as part of the overall throughput metric.**
+- **Scenario 1.** The *local* (i.e., per-device) batch size is fixed to `12`. In this scenario, the reported metric is the average time required per training step over 3 epochs. "Weak scaling" is intended to be measured in this scenario; this test should span *N*, *4N*, and *8N* nodes (in which *N* may equal 1) accordingly. We ask for 3 replicates for each node size, for a total of 9 runs. Model convergence is **not** required in Scenario 1. This scenario requires enabling verbose, per-step logging via the environment variable `LOGGING_FREQUENCY` - see [below](#baseline-scenario-1).
+- **Scenario 2.** The *global* batch size is fixed to `128`, with no specific requirement on the local batch size accordingly. In this scenario, the reported metric is the time required to reach an evaluation accuracy of 82%. This test should span *M*, *2M*, and *4M* nodes (in which *M* may equal 1; *N* and *M* may vary between Scenario 1 and Scenario 2). We ask for 3 replicates for each size of run, for a total of 9 runs. **Results from Scenario 2 are what will be considered as part of the overall throughput metric.**
 
 **Summary of tests**
 
@@ -82,8 +82,8 @@ The ESIF-HPC-4 DeepCAM benchmark encompasses **two** types of scenarios:
 | 1        | *4N*            | 3                    |
 | 1        | *8N*            | 3                    |
 | 2        | *M*             | 3                    |
+| 2        | *2M*            | 3                    |
 | 2        | *4M*            | 3                    |
-| 2        | *8M*            | 3                    |
 
 For convenience, we provide configuration file templates for Scenario 1 ([`config_scenario1.sh`](./config_scenario1.sh)) and Scenario 2 ([`config_scenario2.sh`](./config_scenario2.sh)). Environment variables that are either allowed to be freely changed or are required to be fixed for a [baseline submission](#baseline-submissions) are grouped accordingly in each file.
 
@@ -101,7 +101,7 @@ The following environment variables set in [`config_scenario1.sh`](./config_scen
 
 | Variable           | Description                              | Default Kestrel value  |
 | :--                | :--                                      | :--                    |
-| `STAGE_DIR_PREFIX` | Path to data staging directory           | Stages input data to this directory (e.g., one on a faster filesystem or local node SSD.) If this variable is not set, then data staging does not occur (default). |
+| `STAGE_DIR_PREFIX` | Path to data staging directory           | Stages input data to this directory (e.g., one on a faster filesystem or local node SSD). If this variable is not set, then data staging does not occur (default). |
 | `WIREUP_METHOD`    | Method for distributed process communication | Options are 'nccl-slurm' (default), 'nccl-openmpi', 'nccl-file', 'mpi', or 'dummy' |
 | `DGXNGPU`          | Number of accelerators per node          | `4`                    |
 | `MAX_THREADS`      | Number of data loading threads per node  | `4`                    |
@@ -112,13 +112,14 @@ The following environment variables set in [`config_scenario1.sh`](./config_scen
 | Variable                 | Description                                                         | Required value           |
 | :--                      | :--                                                                 | :--                      |
 | `LOGGING_FREQUENCY`      | Whether to gather logs per-step (`1`) or per-epoch (`0`)            | `1`                      |
-| `MAX_EPOCHS`             | Number of epochs at which training ends, regardless of convergence. | `5`                      |
+| `MAX_EPOCHS`             | Number of epochs at which training ends, regardless of convergence. | `3`                      |
 | `LOCAL_BATCH_SIZE`       | Per-accelerator batch size                                          | `12`                     |
-| `START_LR`               | Starting learning rate                                              | `0.0005`                 |
-| `LR_SCHEDULE_TYPE`       | Learning rate scheduler type                                        | `cosine_annealing`       |
+| `START_LR`               | Starting learning rate                                              | `0.001`                  |
+| `LR_SCHEDULE_TYPE`       | Learning rate scheduler type                                        | `multistep`              |
+| `LR_MILESTONES`          | Training milestone at which to modify LR (for multistep scheduler)  | `8192`                   |
 | `LR_WARMUP_STEPS`        | Number of LR warmup steps                                           | `0`                      |
-| `OPTIMIZER`              | Learning rate optimizer                                             | `AdamW`                  |
-| `WEIGHT_DECAY`           | Strength of L2 regularization                                       | `0.2`                    |
+| `OPTIMIZER`              | Learning rate optimizer                                             | `MixedPrecisionLAMB`     |
+| `WEIGHT_DECAY`           | Strength of L2 regularization                                       | `0.01`                   |
 
 
 #### Baseline Scenario 2
@@ -127,11 +128,11 @@ The following environment variables set in [`config_scenario2.sh`](./config_scen
 
 | Variable           | Description                              | Default Kestrel value  |
 | :--                | :--                                      | :--                    |
-| `STAGE_DIR_PREFIX` | Path to data staging directory           | Stages input data to this directory (e.g., one on a faster filesystem or local node SSD.) If this variable is not set, then data staging does not occur (default). |
+| `STAGE_DIR_PREFIX` | Path to data staging directory           | Stages input data to this directory (e.g., one on a faster filesystem or local node SSD). If this variable is not set, then data staging does not occur (default). |
 | `WIREUP_METHOD`    | Method for distributed process communication | Options are 'nccl-slurm' (default), 'nccl-openmpi', 'nccl-file', 'mpi', or 'dummy' |
 | `DGXNGPU`          | Number of accelerators per node          | `4`                    |
 | `MAX_THREADS`      | Number of data loading threads per node  | `4`                    |
-| `LOCAL_BATCH_SIZE` | Per-accelerator batch size               | Depends on number of GPUs used (`DGXNGPU`\*`Number of nodes`\*`LOCAL_BATCH_SIZE` must equal `1024`). |
+| `LOCAL_BATCH_SIZE` | Per-accelerator batch size               | Depends on number of GPUs used (`DGXNGPU`\*`Number of nodes`\*`LOCAL_BATCH_SIZE` must equal `128`). |
 
 The following environment variables set in [`config_scenario2.sh`](./config_scenario2.sh) **must be set** for *baseline* Scenario 2 submissions:
 
@@ -139,11 +140,12 @@ The following environment variables set in [`config_scenario2.sh`](./config_scen
 | :--                      | :--                                                                 | :--                      |
 | `LOGGING_FREQUENCY`      | Whether to gather logs per-step (`1`) or per-epoch (`0`)            | `0`                      |
 | `MAX_EPOCHS`             | Number of epochs at which training ends, regardless of convergence. | `50`                     | 
-| `START_LR`               | Starting learning rate                                              | `0.0005`                 |
-| `LR_SCHEDULE_TYPE`       | Learning rate scheduler type                                        | `cosine_annealing`       |
+| `START_LR`               | Starting learning rate                                              | `0.001`                  |
+| `LR_SCHEDULE_TYPE`       | Learning rate scheduler type                                        | `multistep`              |
+| `LR_MILESTONES`          | Training milestone at which to modify LR (for multistep scheduler)  | `8192`                   |
 | `LR_WARMUP_STEPS`        | Number of LR warmup steps                                           | `0`                      |
-| `OPTIMIZER`              | Learning rate optimizer                                             | `AdamW`                  |
-| `WEIGHT_DECAY`           | Strength of L2 regularization                                       | `0.2`                    |
+| `OPTIMIZER`              | Learning rate optimizer                                             | `MixedPrecisionLAMB`     |
+| `WEIGHT_DECAY`           | Strength of L2 regularization                                       | `0.01`                   |
 
 ### Ported submissions
 
@@ -162,37 +164,48 @@ For *ported* submissions, the *baseline* parameters must be used, though trainin
 
 ## Benchmark test results to report and files to return
 
-We request the raw runtime logs for each training run in Scenario 1 and Scenario 2, in addition to the summarized tables in the following sections. **We will provide a convenience wrapper script to extract the data requested to be reported from each DeepCAM submission scenario for the tables below at a later date.**
+We request the raw runtime logs for each training run in Scenario 1 and Scenario 2, in addition to the summarized tables in the following sections. 
+
+### Convenience wrapper script to generate output tables
+
+Please follow the README in the `log-parser` folder for instructions on how to validate a given benchmark run and produce an output table described below (in CSV format).
 
 ### Scenario 1 submissions
 
-Noting the median time required per training step (in seconds) across 5 epochs satisfies this submission. This time should **solely** reflect the time spent during training itself. In other words, this excludes the time required for model initiation and the time spent staging data to local disks for faster I/O. 
+Noting the median time required per training step (in seconds) across 3 epochs satisfies this submission. This time should **solely** reflect the time spent during training itself. In other words, this excludes the time required for model initiation and the time spent staging data to local disks for faster I/O. 
 
 For each run following Scenario 1 rules, we request the following information in the table below (using unoptimized Kestrel reference data as an example): 
 
-| Run Type  | Scenario | Nodes used | Replicate | Accelerators per node | Total Accelerators | Local Batch Size | Data staged | Median time per training step (seconds)  |
-| :---      | :---     | :---       | :---      | :---                  | :---               | :---             | :---        | :---                                     |
-| baseline  | 1        | 1          | 1         | 4                     | 4                  | 12               | No          | 0.732                                    |
-| baseline  | 1        | 4          | 1         | 4                     | 16                 | 12               | No          | 0.749                                    |
-| baseline  | 1        | 8          | 1         | 4                     | 32                 | 12               | No          | 0.756                                    |
-| optimized | 1        | *N*        | *R*       | *X*                   | :---               | *Y*              | *<Yes/No>*  | *T*                                      |
-| optimized | 1        | *4N*       | *R*       | *X*                   | :---               | *Y*              | *<Yes/No>*  | *T*                                      |
-| optimized | 1        | *8N*       | *R*       | *X*                   | :---               | *Y*              | *<Yes/No>*  | *T*                                      |
+| Run Type  | Scenario | Nodes used | Accelerators per node | Total Accelerators | Local Batch Size | Data staged     | Median time per training step (seconds)  | Mean time per training step (seconds) | Standard deviation time per training step (seconds)  |
+| :---      | :---     | :---       | :---                  | :---               | :---             | :---            | :---                                     | :--                                   | :--                                                  |
+| baseline  | 1        | 1          | 4                     | 4                  | 12               | False           | 0.732                                    | 0.809                                 | 3.638                                                |
+| baseline  | 1        | 4          | 4                     | 16                 | 12               | False           | 0.749                                    | 0.881                                 | 2.431                                                |
+| baseline  | 1        | 8          | 4                     | 32                 | 12               | False           | 0.756                                    | 0.889                                 | 1.732                                                |
+| optimized | 1        | *N*        | *X*                   | :---               | *Y*              | *<True/False>*  | *T*                                      | *T*                                   | *T*                                                  |
+| optimized | 1        | *4N*       | *X*                   | :---               | *Y*              | *<True/False>*  | *T*                                      | *T*                                   | *T*                                                  |
+| optimized | 1        | *8N*       | *X*                   | :---               | *Y*              | *<True/False>*  | *T*                                      | *T*                                   | *T*                                                  |
 
 
 ### Scenario 2 submissions
 
 Noting the time required (in minutes) to reach 82% validation accuracy satisfies this submission. As with Scenario 1, this time should **solely** reflect the time spent during training itself. In other words, this excludes the time required for model initiation and the time spent staging data to local disks for faster I/O. 
 
-For each run following Scenario 2 rules, we request the following information (using unoptimized Kestrel reference data as an example):
+For each run following Scenario 2 rules, we request the following information (using unoptimized Kestrel reference data as an example). Note that `Nodes used`, `Accelerators per node`, `Total Accelerators`, and `Local Batch Size` may change depending on the system used for benchmarking:
 
-| Run Type  | Scenario | Nodes used | Replicate | Accelerators per node | Total Accelerators | Local Batch Size | LR Scheduler     | Start LR  | Optimizer   | Median timing per epoch (minutes) | Total Time Required* (minutes) | Epochs Required* |
-| :---      | :---     | :---       | :---      | :---                  | :---               | :---             | :---             | :---      | :---        | :---                              | :---                           | :--              |
-| baseline  | 2        | 16         | 1         | 4                     | 64                 | 16               | cosine_annealing | 0.0005    | AdamW       | X                                 | 118.12                         | 49               |
-| baseline  | 2        | 32         | 1         | 4                     | 128                | 8                | cosine_annealing | 0.0005    | AdamW       | X                                 | 68.63                          | 48               |
-| optimized | 2        | *M*        | *R*       | *X*                   | *X\*M*             | *Y*              | *scheduler*      | *Z*       | *optimizer* |                                   | *T*                            | *E*              |
+| Run Type  | Scenario | Nodes used | Accelerators per node | Total Accelerators | Local Batch Size | Data staged    | LR Scheduler     | Start LR  | Optimizer   | Median timing per epoch (seconds) | Total Time Required* (seconds) | Target Accuracy Reached | Epochs Required* |
+| :---      | :---     | :---       | :---                  | :---               | :---             | :---           | :---             | :---      | :---        | :---                              | :---                           | :--                     | :--              |
+| baseline  | 2        | 4          | 4                     | 16                 | 8                | False          | multistep        | 0.001     | LAMB        | 490.59                            | 4564.233                       | 0.82                    | 9                |
+| baseline  | 2        | 4          | 4                     | 16                 | 8                | False          | multistep        | 0.001     | LAMB        | 527.59                            | 4843.240                       | 0.82                    | 9                |
+| baseline  | 2        | 4          | 4                     | 16                 | 8                | False          | multistep        | 0.001     | LAMB        | <>                                | <>                             | 0.82                    | 9                |
+| baseline  | 2        | 8          | 4                     | 32                 | 4                | False          | multistep        | 0.001     | LAMB        | 298.84                            | 2600.539                       | 0.82                    | 9                |
+| baseline  | 2        | 8          | 4                     | 32                 | 4                | False          | multistep        | 0.001     | LAMB        | 254.64                            | 2324.072                       | 0.82                    | 9                |
+| baseline  | 2        | 8          | 4                     | 32                 | 4                | False          | multistep        | 0.001     | LAMB        | 298.84                            | 2600.391                       | 0.82                    | 9                |
+| baseline  | 2        | 16         | 4                     | 64                 | 2                | False          | multistep        | 0.001     | LAMB        | 141.17                            | 1283.236                       | 0.82                    | 9                |
+| baseline  | 2        | 16         | 4                     | 64                 | 2                | False          | multistep        | 0.001     | LAMB        | 148.23                            | 1367.09                        | 0.82                    | 9                |
+| baseline  | 2        | 16         | 4                     | 64                 | 2                | False          | multistep        | 0.001     | LAMB        | 140.80                            | 1276.21                        | 0.82                    | 9                |
+| optimized | 2        | *M*        | *X*                   | *X\*M*             | *Y*              | *<True/False>* | *scheduler*      | *Z*       | *optimizer* | *T*                               | *T*                            | 0.82                    | *E*              |
 
-\* Time or epochs required to reach 82% evaluation accuracy target.
+\* Time or epochs required to reach 82% evaluation accuracy target. The time does not include any data staging performed before model training.
 
 ## References and useful links
 
