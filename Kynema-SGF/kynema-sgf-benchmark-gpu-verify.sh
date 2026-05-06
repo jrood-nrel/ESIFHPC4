@@ -1,0 +1,103 @@
+#!/bin/bash -l
+
+set -ex
+
+BENCHMARK_DIR=/scratch/${USER}/kynema-sgf-benchmark/kynema-sgf-benchmark-gpu-verify
+mkdir -p ${BENCHMARK_DIR}
+cd ${BENCHMARK_DIR}
+
+# Generate average script
+cat >kynema-sgf-average.py <<'EOL'
+#!/usr/bin/env python3
+
+import argparse
+import pandas as pd
+import numpy as np
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="A simple averaging tool")
+    parser.add_argument(
+        "-f",
+        "--fnames",
+        help="Files to average",
+        required=True,
+        nargs="+",
+        type=str,
+    )
+    args = parser.parse_args()
+
+    for fname in args.fnames:
+        data = pd.read_csv(fname, sep="\\s+", skiprows=0, header=None)
+        array = data.to_numpy()
+        print(np.mean(array[:]))
+EOL
+
+# Generate average script
+cat >kynema-sgf-average.sh <<'EOL'
+#!/bin/bash
+
+set -e
+
+i=1
+for file in $(ls -d1 kynema-sgf-benchmark* | sort -V); do
+    echo "$file"
+    grep ^WallClockTime "$file" | awk '{print $NF}' > kynema-sgf-time-$i.txt
+    python3 kynema-sgf-average.py -f kynema-sgf-time-$i.txt >> kynema-sgf-avg.txt
+    rm kynema-sgf-time-$i.txt
+    ((i=i+1))
+done
+EOL
+
+# Generate build script
+cat >build-kynema-sgf-benchmark-gpu-verify.sh <<'EOL'
+#!/bin/bash -l
+set -ex
+module load cuda
+#GCC 12 can't handle the default zen4 target so we use zen3
+module load craype-x86-milan
+git clone --depth=1 --shallow-submodules --recursive https://github.com/Kynema/kynema-sgf.git
+cmake -B kynema-sgf-build \
+	-DKYNEMA_SGF_ENABLE_MPI:BOOL=ON \
+	-DKYNEMA_SGF_ENABLE_CUDA:BOOL=ON \
+	-DCMAKE_CUDA_ARCHITECTURES:STRING=90 \
+	-DKYNEMA_SGF_ENABLE_TESTS:BOOL=ON \
+	-DKYNEMA_SGF_ENABLE_TINY_PROFILE:BOOL=ON \
+        -DKYNEMA_SGF_ENABLE_FCOMPARE:BOOL=ON \
+	-DMPI_HOME:STRING=/opt/cray/pe/mpich/8.1.28/ofi/gnu/10.3 \
+	-DMPI_CXX_COMPILER:STRING=/opt/cray/pe/mpich/8.1.28/ofi/gnu/10.3/bin/mpicxx \
+	-DMPI_C_COMPILER:STRING=/opt/cray/pe/mpich/8.1.28/ofi/gnu/10.3/bin/mpicc \
+	kynema-sgf
+nice cmake --build kynema-sgf-build --parallel 8
+EOL
+
+cat >run-kynema-sgf-benchmark-gpu-verify.sh <<'EOL'
+#!/bin/bash -l
+
+#SBATCH -o %x.o%j
+#SBATCH -A hpcapps
+#SBATCH -t 30
+#SBATCH --partition=gpu-h100s
+#SBATCH --gpus-per-node=4
+#SBATCH --ntasks-per-node=128
+#SBATCH --exclusive
+#SBATCH --mem=0
+
+set -ex
+
+module load cuda
+FIXED_ARGS="nodal_proj.bottom_atol=-1 mac_proj.bottom_atol=-1 time.fixed_dt=0.5 time.max_step=20 ABL.stats_output_frequency=-1 time.plot_interval=20 time.checkpoint_interval=-1 amrex.abort_on_out_of_gpu_memory=1 amrex.the_arena_is_managed=0 amr.blocking_factor=16 amr.max_grid_size=128 amrex.use_profiler_syncs=0 amrex.async_out=0 amr.max_level=1 tagging.labels=g1 tagging.g1.type=GeometryRefinement tagging.g1.shapes=b1 tagging.g1.b1.type=box tagging.g1.b1.origin=0.0 0.0 384.0 tagging.g1.b1.xaxis=1.0e8 0.0 384.0 tagging.g1.b1.yaxis=0.0 1.0e8 384.0 tagging.g1.b1.zaxis=0.0 0.0 256.0"
+TOTAL_RANKS=$((${SLURM_JOB_NUM_NODES}*4))
+cd kynema-sgf-build/test/test_files/abl_godunov
+#srun -N${SLURM_JOB_NUM_NODES} -n${TOTAL_RANKS} --ntasks-per-node=4 --gpus-per-node=4 --gpu-bind=closest ../../../kynema_sgf abl_godunov.inp ${FIXED_ARGS} amr.n_cell=64 64 64 geometry.prob_hi=1024.0 1024.0 1024.0
+#srun -N${SLURM_JOB_NUM_NODES} -n${TOTAL_RANKS} --ntasks-per-node=4 --gpus-per-node=4 --gpu-bind=closest ../../../kynema_sgf abl_godunov.inp ${FIXED_ARGS} amr.n_cell=128 128 64 geometry.prob_hi=2048.0 2048.0 1024.0
+#srun -N${SLURM_JOB_NUM_NODES} -n${TOTAL_RANKS} --ntasks-per-node=4 --gpus-per-node=4 --gpu-bind=closest ../../../kynema_sgf abl_godunov.inp ${FIXED_ARGS} amr.n_cell=256 256 64 geometry.prob_hi=4096.0 4096.0 1024.0
+#srun -N${SLURM_JOB_NUM_NODES} -n${TOTAL_RANKS} --ntasks-per-node=4 --gpus-per-node=4 --gpu-bind=closest ../../../kynema_sgf abl_godunov.inp ${FIXED_ARGS} amr.n_cell=512 512 64 geometry.prob_hi=8192.0 8192.0 1024.0
+srun -N${SLURM_JOB_NUM_NODES} -n${TOTAL_RANKS} --ntasks-per-node=4 --gpus-per-node=4 --gpu-bind=closest ../../../kynema_sgf abl_godunov.inp ${FIXED_ARGS} amr.n_cell=1024 1024 64 geometry.prob_hi=16384.0 16384.0 1024.0
+#srun -N${SLURM_JOB_NUM_NODES} -n${TOTAL_RANKS} --ntasks-per-node=4 --gpus-per-node=4 --gpu-bind=closest ../../../kynema_sgf abl_godunov.inp ${FIXED_ARGS} amr.n_cell=2048 2048 64 geometry.prob_hi=32768.0 32768.0 1024.0
+EOL
+
+# Build Kynema-SGF
+bash build-kynema-sgf-benchmark-gpu-verify.sh
+
+# Submit run script
+sbatch -J kynema-sgf-benchmark-gpu-verify-4 -N 4 run-kynema-sgf-benchmark-gpu-verify.sh

@@ -1,0 +1,17 @@
+#!/bin/bash -l
+set -ex
+module load cuda
+#GCC 12 can't handle the default zen4 target so we use zen3
+module load craype-x86-milan
+git clone --depth=1 --shallow-submodules --recursive https://github.com/Kynema/kynema-sgf.git
+cmake -B kynema-sgf-build \
+	-DKYNEMA_SGF_ENABLE_MPI:BOOL=ON \
+	-DKYNEMA_SGF_ENABLE_CUDA:BOOL=ON \
+	-DCMAKE_CUDA_ARCHITECTURES:STRING=90 \
+	-DKYNEMA_SGF_ENABLE_TESTS:BOOL=ON \
+	-DKYNEMA_SGF_ENABLE_TINY_PROFILE:BOOL=ON \
+	-DMPI_HOME:STRING=/opt/cray/pe/mpich/8.1.28/ofi/gnu/10.3 \
+	-DMPI_CXX_COMPILER:STRING=/opt/cray/pe/mpich/8.1.28/ofi/gnu/10.3/bin/mpicxx \
+	-DMPI_C_COMPILER:STRING=/opt/cray/pe/mpich/8.1.28/ofi/gnu/10.3/bin/mpicc \
+	kynema-sgf
+nice cmake --build kynema-sgf-build --parallel 8

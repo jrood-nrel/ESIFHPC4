@@ -29,7 +29,7 @@ Important Notes:
 | Application | Standard | Accelerated | Optimized | Baseline |
 |:-----------:|:--------:|:-----------:|:---------:|:-----:|
 | [Sienna](https://github.com/NREL/ESIFHPC4/tree/main/Sienna-Ops)      | Yes      | No          | No        | Yes   |
-| [Kynema-SGF](https://github.com/NREL/ESIFHPC4/tree/main/AMR-Wind)    | Optional      | Yes         | Optional  | Yes   |
+| [Kynema-SGF](https://github.com/NREL/ESIFHPC4/tree/main/Kynema-SGF)    | Optional      | Yes         | Optional  | Yes   |
 | [BerkeleyGW](https://github.com/NREL/ESIFHPC4/tree/main/BerkeleyGW)  | Optional      | Yes         | Optional        | Yes   |
 | [WRF](https://github.com/NREL/ESIFHPC4/tree/main/WRF)         | Yes      | No        | Optional  | Yes   |
 
@@ -61,18 +61,18 @@ We have established the following draft definitions for baseline, ported, and op
 We have planned/upcoming changes to the suite that have not yet been integrated but are currently in development. We list any major not-yet-integrated changes here. Please note that this list is subject to change, and we make no guarantee that these changes are reflected in the finalized benchmark suite.
 
 - The Sienna benchmark will be pared down into two functionality runs only.
-- The AMR-Wind benchmark will be updated to reflect the application's new name, Kynema-SGF.
+- The Kynema-SGF benchmark will be updated to reflect the application's new name, Kynema-SGF.
 
 ## Changelog
 
 ### May 5, 2026
-Renamed AMR-Wind to Kynema-SGF in the Class B benchmarks table. Please note that the benchmark contents have not changed, but that the code itself was recently re-named.
+Renamed Kynema-SGF to Kynema-SGF in the Class B benchmarks table. Please note that the benchmark contents have not changed, but that the code itself was recently re-named.
 
 ### Feb 13, 2026
 - Modified VASP Bench1 benchmark by reducing the k-point grid size
 
 ### Feb 11, 2026
-- Updated the definitions of "Class A" and "Class B", and moved VASP, AMR-Wind, and BerkeleyGW from Class A to Class B.
+- Updated the definitions of "Class A" and "Class B", and moved VASP, Kynema-SGF, and BerkeleyGW from Class A to Class B.
 - Added planned change info for VASP Bench1
 
 ### December 10, 2025
@@ -85,7 +85,7 @@ Renamed AMR-Wind to Kynema-SGF in the Class B benchmarks table. Please note that
 - Changed the AI application-level benchmark from MLPerf's 3DUnet to MLPerf's DeepCAM benchmark.
 - Removed the AceCAST/GPU portion of WRF, along with any requests for simultaneous/concurrent runs on test hardware.
 - Removed 12 km input case from WRF
-- Overhauled AMR-Wind benchmark, simplifying and clarifying build instructions, inputs, and run requirements, and removed any requests for simultaneous/concurrent runs on test hardware for AMR-Wind
+- Overhauled Kynema-SGF benchmark, simplifying and clarifying build instructions, inputs, and run requirements, and removed any requests for simultaneous/concurrent runs on test hardware for Kynema-SGF
 - Added "extra large" size input to LAMMPS that should better utilize future hardware; removed any requirement to run "small" and "large" LAMMPS input sizes.
 
 ### September 22, 2025
@@ -96,5 +96,4 @@ Renamed AMR-Wind to Kynema-SGF in the Class B benchmarks table. Please note that
 ### July 29, 2025
 - Removed Q-Chem from the suite
 - Moved BerkeleyGW from "Class B" to "Class A"
-
 
