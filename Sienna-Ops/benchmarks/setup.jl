@@ -16,6 +16,9 @@ Pkg.activate(@__DIR__)
 # Pkg.add(Pkg.PackageSpec(name="DataFrames", version="1.8.1"))
 Pkg.add(Pkg.PackageSpec(name="HiGHS", version="1.22.2"))
 Pkg.add(Pkg.PackageSpec(name="HydroPowerSimulations", version="0.13.1"))
+# Workaround: PSI 0.32.4 declares compat with IS "3" but its code is broken with IS 3.5+
+# (TimeSeriesCacheKey constructor changed from 3 to 5 args in IS 3.5).
+# Pin IS to 3.3.2 until a PSI release fixes the call and tightens its compat bound.
 Pkg.add(Pkg.PackageSpec(name="InfrastructureSystems", version="3.3.2"))
 Pkg.add(Pkg.PackageSpec(name="Ipopt", version="1.14.1"))
 Pkg.add(Pkg.PackageSpec(name="PowerAnalytics", version="1.1.0"))

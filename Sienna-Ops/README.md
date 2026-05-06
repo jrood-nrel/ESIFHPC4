@@ -86,14 +86,16 @@ julia --threads=auto --project=. run_RTS_UC-ED.jl
 ```
 
 #### How we ran this benchmark on Kestrel:
-1. Modify and run the sbatch file `run_benchmarks.sh` as follows
+1. Modify ROOT_DIR and run the sbatch file `run_benchmarks.sh` as follows
+**Note** this script will clone the repo, do Option1 install, and run the benchmark. 
+
 
 ```shell
 sbatch run_benchmarks.sh 1 
 sbatch run_benchmarks.sh auto
 ```
 
-Note: The argument after `run_benchmarks.sh` specifies how many threads julia should be started with. By default, Julia uses only one thread. Setting the number of threads to `auto` means that Julia will set the number of threads to be equal to the number of cores on the system.
+Note: The argument after `run_benchmarks.sh` specifies how many threads Julia should be started with. By default, Julia uses only one thread. Setting the number of threads to `auto` means that Julia will set the number of threads to be equal to the number of cores on the system. JULIA_THREADS variable passed as arg is only used for running the benchmark, not installing it. Multiple Julia threads (auto) are used to speed up HiGHS solver.
 
 ## Run Definitions and Requirements
 
