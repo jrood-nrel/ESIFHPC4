@@ -23,69 +23,99 @@ Sienna requires Julia as the primary programming language and depends on several
 
 ### Instructions to build and install Sienna components:
 
-1. Install Julia from [JuliaLang.org](https://julialang.org/). Specifically, we recommend using the [Manual Downloads](https://julialang.org/downloads/manual-downloads/), and selecting the current stable release appropriate for the target architecture. Below we show two options for building the Julia environment. 
+1. Install Julia from [JuliaLang.org](https://julialang.org/). Specifically, we recommend using the [Manual Downloads](https://julialang.org/downloads/manual-downloads/), and selecting the current stable release appropriate for the target architecture. Below we show two options for building the Julia environment (in our tests we used Julia v1.12.5). 
 
-#### Option 1: Use existing Project.toml and Manifest.toml files
-2. Instantiate the `Project.toml` and `Manifest.toml` files in this directory. On 
-the terminal, assuming that you are in the same directory as this
-README.md, run
-   ```shell
-   julia --project=.
-   ```
-   ```julia
-   ] instantiate
-   ```
-   This should install all the packages needed to run the benchmark
+#### Option 1 (Recommended): Use existing Project.toml and Manifest.toml files
+**NOTE**: This is the recommended approach. The committed `Manifest.toml` is a full lockfile that pins every package at every level of the dependency tree to exact tested versions, guaranteeing reproducibility regardless of what newer package versions may have been released since.
+In terminal do:
+```
+cd ESIFHPC4/Sienna-Ops/benchmarks 
+julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.build()'
+```
 
-#### Option 2: Build your own Julia environment
+This should install all the packages needed to run the benchmark
 
-2. Add the required packages using the Julia package manager:
-   ```julia
-   ] add PowerSimulations PowerSystems@4 HydroPowerSimulations PowerSystemCaseBuilder
-   ```
-3. Addtional tools used in the benchmark:
-   ```julia
-   ] add BenchmarkTools CSV DataFrames
-   ```
-4. Add requisite solvers
-   ```julia
-   ] add HiGHS IPOPT
-   ```
 
-### Instructions on how to run the Sienna benchmark:
+#### Option 2: Build your own Julia environment (with exact versions of direct dependencies only) via setup.jl
+**NOTE**: May break if a new version of an indirect (transitive) dependency is released that is incompatible with the pinned direct dependencies.
 
-#### Running the benchmark from the command line
+Will create fresh `Project.toml` and `Manifest.toml`
+Either
+```
+cd ESIFHPC4/Sienna-Ops/benchmarks
+mv Project.toml Project.toml.bak
+mv Manifest.toml Manifest.toml.bak
+julia setup.jl
+```
+Or in a new project dir
+```
+cd /project/dir
+julia setup.jl
+```
+
+#### Option 3: Build your own Julia environment (with flexible, less pinned versions) via REPL pkg manager.
+**NOTE**: May break if a new version of a direct or indirect dependency is released that introduces incompatible changes.
+
+Will create fresh `Project.toml` and `Manifest.toml`
+Add the required packages using the Julia package manager:
+```
+cd ESIFHPC4/Sienna-Ops/benchmarks
+mv Project.toml Project.toml.bak
+mv Manifest.toml Manifest.toml.bak
+julia --project=.
+]
+activate .
+
+add InfrastructureSystems@3.3.2 PowerSystems@5 PowerSimulations@0.32 PowerSystemCaseBuilder@2 HiGHS HydroPowerSimulations Ipopt PowerAnalytics PowerGraphics
+
+instantiate
+status
+
+"Ctrl+D" (exit pkg manager and Julia REPL) 
+
+```
+
+
+### Instructions on how to run the Sienna benchmark
+
+#### Running the benchmark from the command line (ignore all Info and Warning messages)
 1. Run the benchmark as follows
-   ```shell
-   julia --threads=auto --project=. small/run_RTS_UC-ED.jl
-   ```
+```
+cd ESIFHPC4/Sienna-Ops/benchmarks
+julia --threads=auto --project=. run_RTS_UC-ED.jl
+```
 
 #### How we ran this benchmark on Kestrel:
-1. Modify and run the sbatch file `run_benchmarks.sh` as follows
+1. Modify ROOT_DIR and run the sbatch file `run_benchmarks.sh` as follows
+**Note** this script will clone the repo, do Option1 install, and run the benchmark. 
 
-   ```shell
-   sbatch run_benchmarks.sh 1 
-   sbatch run_benchmarks.sh auto
-   ```
 
-Note: The argument after `run_benchmarks.sh` specifies how many threads julia should be started with. By default, Julia uses only one thread. Setting the number of threads to `auto` means that Julia will set the number of threads to be equal to the number of cores on the system.
+```shell
+sbatch run_benchmarks.sh 1 
+sbatch run_benchmarks.sh auto
+```
+
+Note: The argument after `run_benchmarks.sh` specifies how many threads Julia should be started with. By default, Julia uses only one thread. Setting the number of threads to `auto` means that Julia will set the number of threads to be equal to the number of cores on the system. JULIA_THREADS variable passed as arg is only used for running the benchmark, not installing it. Multiple Julia threads (auto) are used to speed up HiGHS solver.
 
 ## Run Definitions and Requirements
 
-- The benchmark includes:
-  - Unit Commitment and Economic Dispatch simulations using `PowerSimulations.jl`.
-- The input data for these simulations is compatible with `PowerSystems v4.0`.
-
-Note: There is a new version of Sienna that uses `PowerSystems v5.0`. However, this benchmark uses `PowerSystems v4.0`. Data sets and code may be updated to work with the latest version of Sienna, but this is not required. 
+- The benchmark runs 2 days of PCM simulation: 2 Unit Commitment and 2x96 Economic Dispatch simulations using `HiGHS` and `Ipopt` solvers respectively.
+- The `run_RTS_UC-ED.jl` script is compatible with `PowerSystems v5` and `PowerSimulations v0.32`. While it is possible to use other package versions, parsing errors might occur. 
+ 
 
 ## Run Rules
-
 - The Benchmark is single node only.
 - GPU-compatible Optimizers that are compatible with Julia JuMP may be exercised on GPU nodes if desired. However, this is not a requirement.
-- This benchmark has been set up to run using two open source solvers: IPOPT and HiGHS. Proprietary solvers such as Gurobi and Xpress may be used instead, but are not required.
+- This benchmark has been set up to run using two open source solvers: `HiGHS` and `Ipopt`. Proprietary solvers such as `Gurobi` and `Xpress` may be used instead, but are not required.
 
 ## Benchmark test results to report and files to return
 
-The benchmark creates timing, memory, and allocation data that can be inspected visually for comparison. An output summary text file and CSV file are created in `small/benchmark_results` that include these data. These are the files to return. We emphasize, however, that this is only a functionality test, and will not be judged by computation time, answer correctness, etc.
+The `run_RTS_UC-ED.jl` script will create simulation results and plots in `RTS-store` and `RTS-plots` dirs, respectively. Each run `k`, of the script will create a new dir `rts-test<k>`, inside `RTS-store` and `RTS-plots` dirs (or `cleanup.sh` to remove previous run results). These directories with at least one successful run `rts-test` are to be returned. To check for correctness (successful functionality test):
+1.  Script `run_RTS_UC-ED.jl` finishes without errors and at the end of an interactive session, you see:
+<img src="images/interactive_sim_end.png" alt="Plot of results" width="700"/>
 
-Also produced by our script `run_benchmarks.sh` is a file containing information printed by Sienna during the solve process (e.g., fout_RTS_UC-ED_auto.out). This file is not required. 
+2. Two plots, `UC.png` and `ED.png` inside `RTS-plots/rts-test/` look similar to these:
+<img src="images/UC.png" alt="Plot of results" width="700"/>
+<img src="images/ED.png" alt="Plot of results" width="700"/>
+
+
