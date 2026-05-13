@@ -8,7 +8,7 @@ The OSU Microbenchmark collection represents a suite of tests used to measure MP
 The OSU Microbenchmark collection is available under BSD licensing. Further information can be located here: https://mvapich.cse.ohio-state.edu/static/media/mvapich/LICENSE-OMB.txt
 
 ## Other Requirements
-While returned results may use any MPI distribution, we request that at least one returned osu_mbw_mr test result be obtained with OpenMPI to demonstrate OpenMPI functionality. In addition, the 
+While returned results may use any MPI distribution, we request that at least one returned osu_mbw_mr test result be obtained with OpenMPI to demonstrate OpenMPI functionality. 
 
 ## How to build
 
