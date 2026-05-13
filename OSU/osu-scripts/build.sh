@@ -43,6 +43,7 @@ cp osu-microbenchmarks-install/libexec/osu-micro-benchmarks/mpi/pt2pt/osu_latenc
 cp osu-microbenchmarks-install/libexec/osu-micro-benchmarks/mpi/pt2pt/osu_mbw_mr $PWD
 cp osu-microbenchmarks-install/libexec/osu-micro-benchmarks/mpi/collective/osu_allreduce $PWD
 cp osu-microbenchmarks-install/libexec/osu-micro-benchmarks/mpi/collective/osu_alltoall $PWD
+cp osu-microbenchmarks-install/libexec/osu-micro-benchmarks/mpi/collective/osu_bibw $PWD
 
 
 
