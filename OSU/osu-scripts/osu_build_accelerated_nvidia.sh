@@ -53,6 +53,8 @@ cp osu-microbenchmarks-install-accelerated/libexec/osu-micro-benchmarks/mpi/pt2p
 cp osu-microbenchmarks-install-accelerated/libexec/osu-micro-benchmarks/mpi/pt2pt/osu_mbw_mr $PWD/osu_mbw_mr_accelerated
 cp osu-microbenchmarks-install-accelerated/libexec/osu-micro-benchmarks/mpi/collective/osu_allreduce $PWD/osu_allreduce_accelerated
 cp osu-microbenchmarks-install-accelerated/libexec/osu-micro-benchmarks/mpi/collective/osu_alltoall $PWD/osu_alltoall_accelerated
+cp osu-microbenchmarks-install-accelerated/libexec/osu-micro-benchmarks/mpi/collective/osu_bibw $PWD/osu_bibw_accelerated
+
 
 
 

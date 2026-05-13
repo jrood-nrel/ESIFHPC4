@@ -1,14 +1,14 @@
 # OSU Microbenchmarks
 
 ## Purpose and Description
-The OSU Microbenchmark collection represents a suite of tests used to measure MPI performance in distributed computing systems. The tests herein include measurements of network latency (Ping Pong test), bandwidth rates across pairs of processes, collective communication tests (All-Reduce and All-to-All), and accelerator-based All-to-All and message rate tests.
+The OSU Microbenchmark collection represents a suite of tests used to measure MPI performance in distributed computing systems. The tests herein include measurements of network latency (Ping Pong test), bandwidth rates across pairs of processes, collective communication tests (All-Reduce and All-to-All), and accelerator-based All-to-All and message rate tests. In addition, we have two bandwidth tests for bandwidth transfer rates across devices (CPU/Accelerator) on a single host.
 
 ## Licensing Requirements
 
 The OSU Microbenchmark collection is available under BSD licensing. Further information can be located here: https://mvapich.cse.ohio-state.edu/static/media/mvapich/LICENSE-OMB.txt
 
 ## Other Requirements
-While returned results may use any MPI distribution, we request that at least one returned osu_mbw_mr test result be obtained with OpenMPI to demonstrate OpenMPI functionality.
+While returned results may use any MPI distribution, we request that at least one returned osu_mbw_mr test result be obtained with OpenMPI to demonstrate OpenMPI functionality. 
 
 ## How to build
 
@@ -26,10 +26,11 @@ The tables below detail the required tests. The OSU micro-benchmarks are require
 
 | Test          | Description                    | Nodes Used | Ranks Used          |
 |---------------|--------------------------------|------------|---------------------|
-| osu_latency   | Latency (PingPong)            | 2          | 1 Per Node          |
+| osu_latency   | Latency (PingPong)             | 2          | 1 Per Node          |
 | osu_mbw_mr    | Multi-Bandwidth & Message Rate | 2          | At Least 80% Available Cores Per Node |
 | osu_allreduce | All-Reduce MPI Operations      | All        | At Least 80% Available Cores Per Node |
 | osu_alltoall  | All-To-All MPI Operations      | All        | 1 Per NIC            |
+| osu_bibw      | Bandwidth Transfer - CPU       | 1          | 2                    |
 
 ### Accelerated Run Requirements
 
@@ -39,6 +40,7 @@ A successful run of the OSU Micro-benchmarks on an accelerated architecture is d
 |---------------|--------------------------------|------------|-------------------|
 | osu_mbw_mr    | Multi-Bandwidth & Message Rate | 2          | 1 Per Accelerator |
 | osu_alltoall  | All-To-All MPI Operations      | All        | 1 Per Accelerator |
+| osu_bibw      | Bandwidth Transfer - Accelerator| 1          | 1 Accelerator    |
 
 
 

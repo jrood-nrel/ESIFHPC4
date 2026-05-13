@@ -1,0 +1,41 @@
+#!/bin/bash
+#SBATCH -N 1
+#SBATCH --job-name=osu-pt2pt-bandwidth-accelerated
+#SBATCH --ntasks-per-node=2
+#SBATCH --mem=0
+#SBATCH --exclusive
+#SBATCH --gpus=1
+#SBATCH --output=osu-bandwidth-accelerated/osu-bandwidth-accelerated_%a.out
+#SBATCH --time=00:20:00
+#SBATCH --array=1-5
+
+### Script is written to be submitted to a slurm job scheduler, basic parameters are filled in
+### Script can be modified to fit other job schedulers as necessary
+### We repeat this test 8 times 
+### This test is to gather memory bandwidth transferred between Host / Accelerated device
+
+ml nvhpc
+ml craype-accel-nvidia90
+
+nodes=1
+PPN=2
+MSG=65536
+TYPE=mpi_float
+
+export MPICH_VERSION_DISPLAY=1
+export MPICH_OFI_NIC_VERBOSE=1
+export MPICH_ENV_DISPLAY=1
+export MPICH_GPU_SUPPORT_ENABLED=1
+
+let RANKS=($nodes * $PPN)
+
+for k in `seq 8`
+do
+srun -N $nodes -n $RANKS --ntasks-per-node=$PPN --gpus-per-node=$gpus ./osu_bibw_accelerated -d cuda -i 5000 H D
+done
+
+
+
+
+
+
