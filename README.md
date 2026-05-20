@@ -60,12 +60,16 @@ We have established the following draft definitions for baseline, ported, and op
 ## Planned Changes
 We have planned/upcoming changes to the suite that have not yet been integrated but are currently in development. We list any major not-yet-integrated changes here. Please note that this list is subject to change, and we make no guarantee that these changes are reflected in the finalized benchmark suite.
 
-- The Sienna benchmark will be pared down into two functionality runs only.
+- None at this time
 
 ## Changelog
 
+### May 13, 2026
+- Updated Sienna benchmark, reducing the number of functionality runs and updating run instructions.
+- Updated OSU benchmark with an additional bandwidth-related test.
+
 ### May 5, 2026
-Changed naming of Kynema-SGF in the Class B benchmarks table and updated corresponding benchmark repo. Please note that the benchmark contents have not changed, but that the code itself was recently re-named.
+- Changed naming of Kynema-SGF in the Class B benchmarks table and updated corresponding benchmark repo. Please note that the benchmark contents have not changed, but that the code itself was recently re-named.
 
 ### Feb 13, 2026
 - Modified VASP Bench1 benchmark by reducing the k-point grid size
