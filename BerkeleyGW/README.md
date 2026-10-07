@@ -85,7 +85,7 @@ module load python
 
 ## 1.1 Downloading BerkeleyGW
 
-To compile BerkeleyGW yourself, the latest code version can be downloaded from the BerkeleyGW website: [https://berkeleygw.org/download/](https://berkeleygw.org/download/) or using this [direct download link](https://app.box.com/s/22edl07muvhfnd900tnctsjjftbtcqc4). The current release (4.0 at the time of this writing) is recommended due to the many performance improvements as compared to the 3.x versions. In the directory containing `BerkeleyGW-4.0.tar.gz`, untar the BerkeleyGW source code:
+To compile BerkeleyGW yourself, the latest code version can be downloaded from the BerkeleyGW website: [https://berkeleygw.org/download/](https://berkeleygw.org/download/) or using this [direct download link](https://app.box.com/s/22edl07muvhfnd900tnctsjjftbtcqc4). The current release (4.0 at the time of this writing) is recommended due to the many performance improvements as compared to the 3.x versions. Other (including future) versions besides 4.0 may be used for baseline results provided the version is a publicly available BerkeleyGW release at the time of machine arrival. In the directory containing `BerkeleyGW-4.0.tar.gz`, untar the BerkeleyGW source code:
 ```
 tar -xvf BerkeleyGW-4.0.tar.gz
 ```
