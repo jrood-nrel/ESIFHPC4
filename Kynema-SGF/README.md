@@ -185,7 +185,7 @@ For either case, please refer to the [Benchmark Case Description](#benchmark-cas
 
 The output from all the runs used to create the plot of the results from the Kestrel reference machine are provided [here](kynema-sgf-benchmark-kestrel-results) as a reference. These results were used in the table above.
 
-The Kynema-SGF-specific information should be provided in the Excel spreadsheet which includes the other benchmarks, in the Kynema-SGF tab. Note the table above reference results should match the reference results in the spreadsheet. Also, list which version or commit of Kynema-SGF was used on the target system.
+The Kynema-SGF-specific information should be provided in the Excel spreadsheet which includes the other benchmarks, in the Kynema-SGF tab. Note the table above reference results should match the reference results in the spreadsheet. Also, list which version or commit of Kynema-SGF was used on the target system when using the main branch.
 
 Below is the plot of the results of the Kestrel reference system. Note the "naive" case is only shown to help display that Kestrel requires a very specific 72 rank per node configuration with specific process bindings on nodes with 2 network interconnect devices to achieve good performance for Kynema-SGF. The "ideal" lines illustrate perfect linear scaling in each case.
 
