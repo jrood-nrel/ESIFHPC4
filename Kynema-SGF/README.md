@@ -15,10 +15,10 @@ Kynema-SGF utilizes the AMReX library and therefore runs on CPUs, or NVIDIA, AMD
 The following script completed the runs on the CPUs using the CPU benchmark case and performed a strong scaling. Our best performance on the Kestrel machine uses 72 ranks per node with specific process bindings shown in the scripts. Kynema-SGF is configured in this case to run calculatons for 20 timesteps and perform no I/O:
 [kynema-sgf-benchmark-cpu.sh](kynema-sgf-benchmark-cpu.sh)
 
-This script completed a single run on the CPUs using the CPU benchmark on 4 nodes. Kynema-SGF is configured in this case to run calculatons for 20 timesteps and perform plot output at step 20. This plot output contains the physical quantities involved in the simulation:
+The next following script completed a single run on the CPUs using the CPU benchmark on 4 nodes. Kynema-SGF is configured in this case to run calculatons for 20 timesteps and perform plot output at step 20. This plot output contains the physical quantities involved in the simulation:
 [kynema-sgf-benchmark-cpu-verify.sh](kynema-sgf-benchmark-cpu-verify.sh)
 
-This script completed a strong scaling on the GPUs using the GPU benchmark case which has 4x the number of cells as the CPU case. Again, it runs for 20 timesteps with no I/O using 1 MPI rank per GPU:
+This next script completed a strong scaling on the GPUs using the GPU benchmark case which has 4x the number of cells as the CPU case. Again, it runs for 20 timesteps with no I/O using 1 MPI rank per GPU:
 [kynema-sgf-benchmark-gpu.sh](kynema-sgf-benchmark-gpu.sh)
 
 This is the same as the previous GPU case but with GPU-aware MPI enabled on Kestrel:
@@ -51,7 +51,7 @@ Note that `amr.n_cell` refers to the number of cells in the outermost refinement
 
 The [run-all.sh](run-all.sh) script shows the nodes on the Kestrel machine in which each script of the specific benchmark was run. Note the scripts are provided as an exact blueprint of how our reference results were obtained and it is not expected they are to be followed exactly on other hardware. After building with the steps shown in the provided scripts. The scripts also show how the strong scaling was run. Once the simulations completed, the averaging scripts were run, then the total number of cells in the simulation were added together and divided by the number of CPU cores or GPUs. The average time per timestep was then plotted against the cells per CPU core or GPU. 
 
-To get the average of the time per timestep for our strong scaling plot, we used two scripts that focus on averaging the `Total` time per timestep over 20 timesteps. One bash extracts the Kynema-SGF wallclock times for all cases run and one python script finds the mean. These are also generated from within the scripts provided in this repo. Once the cases are run, one can use `bash kynema-sgf-average.sh` in each directory to generate an `kynema-sgf-avg.txt` file with the average time per timestep of each case. The number of cells in the Kynema-SGF simulations is reported at the start of the simulation with the number of cells for each level. These numbers can be added together and divided by the number of CPU cores or GPUs in which the case was using to get the cells per CPU core or GPU. For our results, this calculation was done manually and put into the [LaTeX plot code](kynema-sgf-strong-scaling-abl.tex). This shows exactly how our results were plotted from the information in the logs from the Kestrel benchmark runs, relating the time per timestep to the number of cells per core or GPU.
+To get the average of the time per timestep for our strong scaling plot, we used two scripts that focus on averaging the `Total` time per timestep over 20 timesteps. A bash script extracts the Kynema-SGF wallclock times for all cases run and a python script finds the mean. These also get generated from within the scripts provided in this repo. Once the cases are run, one can use `bash kynema-sgf-average.sh` in each directory to generate an `kynema-sgf-avg.txt` file with the average time per timestep of each case. The number of cells in the Kynema-SGF simulations is reported at the start of the simulation with the number of cells for each level. These numbers can be added together and divided by the number of CPU cores or GPUs in which the case was using to get the cells per CPU core or GPU. For our results, this calculation was done manually and put into the [LaTeX plot code](kynema-sgf-strong-scaling-abl.tex). This shows exactly how our results were plotted from the information in the logs from the Kestrel benchmark runs, relating the time per timestep to the number of cells per core or GPU.
 
 kynema-sgf-average.py:
 ```
@@ -174,19 +174,19 @@ For either case, please refer to the [Benchmark Case Description](#benchmark-cas
 
 | Benchmark | Cores        | MPI Ranks| Steps  | Cells/Core | Time Per Timestep(s)     |
 |:---------:|:------------:|:--------:|:------:|:----------:|:------------------------:|
-|   CPU     |       72     |    72    |  20    |  806596    |    11.1510               |
-|   CPU     |       144    |    144   |  20    |  403298    |    6.18195               |
-|   CPU     |       288    |    288   |  20    |  201649    |    5.34305               |
-|   CPU     |       576    |    576   |  20    |  100824    |    4.01630               |
-|   CPU     |       1152   |    1152  |  20    |  50412     |    3.73549               |
-|   CPU     |       2304   |    2304  |  20    |  25206     |    3.08605               |
-|   CPU     |       4608   |    4608  |  20    |  12603     |    2.81844               |
-|   CPU     |       9216   |    9216  |  20    |  6301      |    2.30490               |
+|   CPU     |       72     |    72    |  20    |  806596    |    10.9840               |
+|   CPU     |       144    |    144   |  20    |  403298    |    5.59810               |
+|   CPU     |       288    |    288   |  20    |  201649    |    2.88060               |
+|   CPU     |       576    |    576   |  20    |  100824    |    1.40910               |
+|   CPU     |       1152   |    1152  |  20    |  50412     |    0.72720               |
+|   CPU     |       2304   |    2304  |  20    |  25206     |    0.42018               |
+|   CPU     |       4608   |    4608  |  20    |  12603     |    0.26353               |
+|   CPU     |       9216   |    9216  |  20    |  6301      |    0.26224               |
 
-The output from all the runs used to create the plot of the results from the Kestrel reference machine are provided [here](kynema-sgf-benchmark-kestrel-results) as a reference.
+The output from all the runs used to create the plot of the results from the Kestrel reference machine are provided [here](kynema-sgf-benchmark-kestrel-results) as a reference. These results were used in the table above.
 
-The Kynema-SGF-specific information should can also be provided in the Excel spreadsheet which includes the other benchmarks, in the Kynema-SGF tab.
+The Kynema-SGF-specific information should be provided in the Excel spreadsheet which includes the other benchmarks, in the Kynema-SGF tab. Note the table above reference results should match the reference results in the spreadsheet. Also, list which version or commit of Kynema-SGF was used on the target system when using the main branch.
 
 Below is the plot of the results of the Kestrel reference system. Note the "naive" case is only shown to help display that Kestrel requires a very specific 72 rank per node configuration with specific process bindings on nodes with 2 network interconnect devices to achieve good performance for Kynema-SGF. The "ideal" lines illustrate perfect linear scaling in each case.
 
-![Kynema-SGF Strong Scaling](https://github.com/NREL/ESIFHPC4/blob/main/Kynema-SGF/kynema-sgf-strong-scaling-abl.tex.png?raw=true)
+![Kynema-SGF Strong Scaling](https://github.com/NatLabRockies/ESIFHPC4/blob/main/Kynema-SGF/kynema-sgf-strong-scaling-abl.tex.png?raw=true)
