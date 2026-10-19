@@ -64,6 +64,10 @@ We have planned/upcoming changes to the suite that have not yet been integrated 
 
 ## Changelog
 
+### Oct 19, 2016
+
+- Minor changes to Kynema-SGF, BerkeleyGW, and WRF to clarify run rules and results.
+
 ### May 13, 2026
 - Updated Sienna benchmark, reducing the number of functionality runs and updating run instructions.
 - Updated OSU benchmark with an additional bandwidth-related test.
@@ -75,7 +79,7 @@ We have planned/upcoming changes to the suite that have not yet been integrated 
 - Modified VASP Bench1 benchmark by reducing the k-point grid size
 
 ### Feb 11, 2026
-- Updated the definitions of "Class A" and "Class B", and moved VASP, Kynema-SGF, and BerkeleyGW from Class A to Class B.
+- Updated the definitions of "Class A" and "Class B", and moved Kynema-SGF and BerkeleyGW from Class A to Class B.
 - Added planned change info for VASP Bench1
 
 ### December 10, 2025
